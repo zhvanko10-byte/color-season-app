@@ -1,1 +1,242 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Color Season TMA</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Montserrat:wght@300;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
+    <style>
+        :root {
+            --accent: #d4af37; /* Премиальный золотой цвет */
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            font-family: 'Montserrat', sans-serif;
+            overflow: hidden;
+            color: #fff;
+        }
+
+        /* Камера на весь экран */
+        #video-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        #video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Интерфейс поверх видео */
+        #ui-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            pointer-events: none; /* Касания проходят сквозь слой к Swiper */
+        }
+
+        #header {
+            padding: 60px 20px 20px;
+            text-align: center;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+        }
+
+        #palette-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 46px;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            color: var(--accent);
+            text-shadow: 0 4px 20px rgba(0,0,0,1);
+            margin: 0;
+            font-style: italic;
+        }
+
+        /* Контейнер для свайпов */
+        .swiper {
+            width: 100%;
+            height: 100%;
+            pointer-events: auto; /* Включаем касания для перелистывания */
+        }
+
+        .swiper-slide {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding-bottom: 100px;
+        }
+
+        /* Сетка кружков (30 штук) */
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr); /* 5 в ряд */
+            gap: 12px;
+            width: 85%;
+            max-width: 420px;
+        }
+
+        .dot {
+            aspect-ratio: 1 / 1;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.4);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.6);
+            transition: transform 0.2s;
+        }
+
+        /* Нижняя часть */
+        #footer-ui {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 40px 20px;
+            text-align: center;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            pointer-events: auto;
+            z-index: 10;
+        }
+
+        .btn-vip {
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: 18px 50px;
+            border-radius: 50px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 13px;
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.4);
+        }
+
+        .swipe-hint {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin-top: 25px;
+            opacity: 0.8;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="video-container">
+        <video id="video" autoplay playsinline muted></video>
+    </div>
+
+    <div id="ui-overlay">
+        <div id="header">
+            <h1 id="palette-name">LIGHT</h1>
+        </div>
+
+        <div class="swiper">
+            <div class="swiper-wrapper" id="palette-wrapper">
+                </div>
+        </div>
+
+        <div id="footer-ui">
+            <button class="btn-vip" onclick="window.Telegram.WebApp.openLink('https://t.me/tribute')">Открыть VIP палитры</button>
+            <div class="swipe-hint">← Свайп в сторону →</div>
+        </div>
+    </div>
+
+    <script>
+        // ДАННЫЕ ЦВЕТОВ (все 6 страниц из презентации)
+        const paletteData = [
+            { name: "LIGHT", colors: ["#FFFFF0","#FFFFFF","#FAEBD7","#D2B48C","#BC8F8F","#A0522D","#DEB887","#696969","#808080","#D3D3D3","#2F4F4F","#8FBC8F","#DC143C","#000080","#800080","#FFB6C1","#FF69B4","#DB7093","#FFA07A","#F0E68C","#6A5ACD","#87CEEB","#7B68EE","#4169E1","#00BFFF","#AFEEEE","#9ACD32","#008000","#3CB371","#008080"] },
+            { name: "DEEP", colors: ["#FFFFF0","#FFFFFF","#8B4513","#D2B48C","#BC8F8F","#3b1d1d","#030000","#2b2a2a","#454545","#160859","#0c300c","#0b4a0a","#0a4a41","#39522d","#380a19","#f0f26b","#bad45d","#d681d2","#e83c3c","#b82c2c","#c9240a","#3e0f59","#5d339c","#52070e","#52073c","#2f591e","#1e594b","#0c382d","#0d2185","#1e40e8"] },
+            { name: "WARM", colors: ["#FFFFF0","#FFFFFF","#FAEBD7","#D2B48C","#7a6411","#4a310b","#3d3830","#292520","#3d2e22","#313a66","#224a31","#38330a","#736a1d","#999782","#5a337a","#82d7d9","#f5f37f","#e6bf35","#e67b17","#f0950c","#a1d158","#f7aa83","#e8761e","#e8571e","#eb4949","#ad3311","#e31b1b","#aa1be3","#3ac2e8","#1ba18ac"] },
+            { name: "COOL", colors: ["#FFFFFF","#FAEBD7","#f0f0e4","#70736f","#c0c4c4","#757878","#757878","#152433","#000000","#03331a","#054f3f","#09544f","#571cb0","#1621c4","#c90c4b","#e69ad5","#a76cab","#de41f0","#bddecb","#158244","#0c614c","#1b8a8c","#52e1e3","#96dfeb","#0a64a8","#5c1e61","#999ee8","#5157b0","#341994","#0c1761"] },
+            { name: "CLEAR", colors: ["#FFFFF0","#FFFFFF","#D2B48C","#70736f","#c0c4c4","#3b1d1d","#030000","#2b2a2a","#160859","#571cb0","#1621c4","#0d2185","#1b5408","#047d34","#c41b1b","#82d7d9","#f2f072","#999ee8","#f0a35b","#c42585","#cf2b2b","#8a0f0f","#90cf3e","#258f2a","#136120","#315bc4","#17278a","#38178a","#46b4eb","#0da1b8"] },
+            { name: "SOFT", colors: ["#FFFFFF","#D2B48C","#BC8F8F","#e0bf87","#6e4931","#826653","#8B4513","#707050","#999782","#3d3830","#292520","#313a66","#243042","#224a31","#451733","#e8b8a0","#c42585","#82d7d9","#82d7d9","#258f2a","#3f9170","#69c27f","#2f5c35","#2f5c35","#999ee8","#5157b0","#103575","#401f6b","#5a41a6","#59190f"] }
+        ];
+
+        const tg = window.Telegram.WebApp;
+        tg.expand(); 
+        tg.ready();
+
+        // Создание слайдов
+        function initApp() {
+            const wrapper = document.getElementById('palette-wrapper');
+            
+            paletteData.forEach(p => {
+                const slide = document.createElement('div');
+                slide.className = 'swiper-slide';
+                
+                const grid = document.createElement('div');
+                grid.className = 'color-grid';
+                
+                p.colors.forEach(color => {
+                    const dot = document.createElement('div');
+                    dot.className = 'dot';
+                    dot.style.backgroundColor = color;
+                    grid.appendChild(dot);
+                });
+                
+                slide.appendChild(grid);
+                wrapper.appendChild(slide);
+            });
+
+            // Инициализация Swiper
+            const swiper = new Swiper('.swiper', {
+                loop: true,
+                on: {
+                    slideChange: function () {
+                        const index = this.realIndex;
+                        document.getElementById('palette-name').innerText = paletteData[index].name;
+                    },
+                },
+            });
+        }
+
+        // Запуск камеры (задней)
+        async function startCamera() {
+            try {
+                const constraints = {
+                    video: {
+                        facingMode: "environment",
+                        width: { ideal: 3840 },
+                        height: { ideal: 2160 }
+                    },
+                    audio: false
+                };
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                document.getElementById('video').srcObject = stream;
+            } catch (err) {
+                // Если 4K не тянет, пробуем просто заднюю камеру
+                navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+                    .then(s => document.getElementById('video').srcObject = s)
+                    .catch(e => alert("Доступ к камере отклонен"));
+            }
+        }
+
+        // Запуск всего
+        initApp();
+        startCamera();
+    </script>
+</body>
+</html>
