@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Color Season Pro</title>
+    <title>Color Season App</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,11 +20,11 @@
             width: 100%;
             height: 100%;
             background: #000;
-            font-family: sans-serif;
             overflow: hidden;
+            font-family: sans-serif;
         }
 
-        /* Камера как фон */
+        /* Задний фон — Камера */
         #video-container {
             position: fixed;
             top: 0;
@@ -40,7 +40,7 @@
             object-fit: cover;
         }
 
-        /* Оверлей интерфейса */
+        /* Интерфейс */
         #ui-overlay {
             position: absolute;
             top: 0;
@@ -50,10 +50,10 @@
             z-index: 2;
             display: flex;
             flex-direction: column;
-            pointer-events: none;
+            pointer-events: none; /* Пропускает нажатия к Swiper */
         }
 
-        /* Заголовок с обводкой */
+        /* Название палитры с черным контуром */
         #header {
             padding: 60px 20px 20px;
             text-align: center;
@@ -61,19 +61,19 @@
 
         #palette-name {
             font-family: 'Playfair Display', serif;
-            font-size: 48px;
+            font-size: 50px;
             text-transform: uppercase;
             letter-spacing: 5px;
             font-style: italic;
             margin: 0;
             color: white;
-            /* Тонкая черная обводка */
+            /* Эффект обводки */
             text-shadow: 
-                -1px -1px 0 #000,  
-                 1px -1px 0 #000,
-                -1px  1px 0 #000,
-                 1px  1px 0 #000,
-                 0 4px 10px rgba(0,0,0,0.5);
+                -1.5px -1.5px 0 #000,  
+                 1.5px -1.5px 0 #000,
+                -1.5px  1.5px 0 #000,
+                 1.5px  1.5px 0 #000,
+                 0 5px 15px rgba(0,0,0,0.6);
         }
 
         /* Слайдер */
@@ -87,44 +87,43 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding-bottom: 50px;
+            padding-bottom: 60px;
         }
 
-        /* Сетка кружков */
+        /* Сетка цветов 5x6 */
         .color-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
             gap: 12px;
-            width: 85%;
-            max-width: 400px;
+            width: 88%;
+            max-width: 420px;
         }
 
         .dot {
             aspect-ratio: 1 / 1;
             border-radius: 50%;
-            border: 1.5px solid rgba(255,255,255,0.6);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+            border: 1.5px solid rgba(255,255,255,0.7);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
         }
 
-        /* Пагинация в стиле iPhone */
+        /* Точки iPhone Style */
         .swiper-pagination {
-            bottom: 40px !important;
-            pointer-events: auto;
+            bottom: 50px !important;
         }
 
         .swiper-pagination-bullet {
             width: 8px;
             height: 8px;
             background: #fff;
-            opacity: 0.5;
+            opacity: 0.4;
             transition: all 0.3s ease;
-            box-shadow: 0 0 4px rgba(0,0,0,0.8);
+            box-shadow: 0 0 5px rgba(0,0,0,0.8);
         }
 
         .swiper-pagination-bullet-active {
             opacity: 1;
-            width: 20px; /* Растянутая точка как в iOS */
-            border-radius: 4px;
+            width: 24px; /* Эффект растянутой капсулы */
+            border-radius: 5px;
             background: #fff;
         }
     </style>
@@ -150,38 +149,37 @@
         const paletteData = [
             { name: "light", colors: ["#FFFFF0","#FFFFFF","#FAEBD7","#D2B48C","#BC8F8F","#A0522D","#DEB887","#696969","#808080","#D3D3D3","#2F4F4F","#8FBC8F","#DC143C","#000080","#800080","#FFB6C1","#FF69B4","#DB7093","#FFA07A","#F0E68C","#6A5ACD","#87CEEB","#7B68EE","#4169E1","#00BFFF","#AFEEEE","#9ACD32","#008000","#3CB371","#008080"] },
             { name: "deep", colors: ["#FFFFF0","#FFFFFF","#8B4513","#D2B48C","#BC8F8F","#3b1d1d","#030000","#2b2a2a","#454545","#160859","#0c300c","#0b4a0a","#0a4a41","#39522d","#380a19","#f0f26b","#bad45d","#d681d2","#e83c3c","#b82c2c","#c9240a","#3e0f59","#5d339c","#52070e","#52073c","#2f591e","#1e594b","#0c382d","#0d2185","#1e40e8"] },
-            { name: "warm", colors: ["#FFFFF0","#FFFFFF","#FAEBD7","#D2B48C","#7a6411","#4a310b","#3d3830","#292520","#3d2e22","#313a66","#224a31","#38330a","#736a1d","#999782","#5a337a","#82d7d9","#f5f37f","#e6bf35","#e67b17","#f0950c","#a1d158","#f7aa83","#e8761e","#e8571e","#eb4949","#ad3311","#e31b1b","#aa1be3","#3ac2e8","#1ba18a"] },
-            { name: "warm2", colors: ["#FFFFF0","#FFFFFF","#FAEBD7","#D2B48C","#99715d","#4a310b","#3d3830","#292520","#3d2e22","#313a66","#224a31","#38330a","#736a1d","#999782","#5a337a","#82d7d9","#f5f37f","#e6bf35","#e67b17","#f0950c","#a1d158","#f7aa83","#bd5709","#e8571e","#eb4949","#ad3311","#e31b1b","#aa1be3","#3ac2e8","#658c5d"] },
-            { name: "cool", colors: ["#FFFFFF","#FAEBD7","#f0f0e4","#70736f","#c0c4c4","#757878","#757878","#152433","#000000","#03331a","#054f3f","#09544f","#571cb0","#1621c4","#c90c4b","#e69ad5","#a76cab","#de41f0","#bddecb","#158244","#0c614c","#1b8a8c","#52e1e3","#96dfeb","#0a64a8","#5c1e61","#999ee8","#5157b0","#341994","#0c1761"] },
-            { name: "cool2", colors: ["#FFFFFF","#FAEBD7","#f0f0e4","#70736f","#c0c4c4","#c9cfc8","#2b0606","#152433","#000000","#03331a","#1a472c","#09544f","#571cb0","#1621c4","#c90c4b","#e69ad5","#a76cab","#de41f0","#bddecb","#158244","#0c614c","#1b8a8c","#52e1e3","#96dfeb","#0a64a8","#5c1e61","#999ee8","#5157b0","#341994","#0c1761"] },
-            { name: "clear", colors: ["#FFFFF0","#FFFFFF","#D2B48C","#70736f","#c0c4c4","#3b1d1d","#030000","#2b2a2a","#160859","#571cb0","#1621c4","#0d2185","#1b5408","#047d34","#c41b1b","#82d7d9","#f2f072","#999ee8","#f0a35b","#c42585","#cf2b2b","#8a0f0f","#90cf3e","#258f2a","#136120","#315bc4","#17278a","#38178a","#46b4eb","#0da1b8"] },
-            { name: "clear2", colors: ["#FFFFF0","#FFFFFF","#D2B48C","#70736f","#c0c4c4","#3b1d1d","#030000","#2b2a2a","#160859","#571cb0","#1621c4","#0d2185","#066b14","#047d34","#c41b1b","#82d7d9","#f2f072","#999ee8","#f0a35b","#c42585","#cf2b2b","#8a0f0f","#90cf3e","#258f2a","#136120","#315bc4","#17278a","#38178a","#46b4eb","#0da1b8"] },
-            { name: "soft", colors: ["#FFFFFF","#D2B48C","#BC8F8F","#e0bf87","#6e4931","#826653","#8B4513","#707050","#999782","#3d3830","#292520","#313a66","#243042","#224a31","#451733","#e8b8a0","#c42585","#82d7d9","#82d7d9","#258f2a","#3f9170","#69c27f","#2f5c35","#2f5c35","#999ee8","#5157b0","#103575","#401f6b","#5a41a6","#59190f"] },
-            { name: "soft2", colors: ["#FFFFFF","#D2B48C","#BC8F8F","#e0bf87","#6e4931","#826653","#8B4513","#707050","#999782","#3d3830","#292520","#313a66","#243042","#224a31","#451733","#e8b8a0","#c42585","#bd4626","#82d7d9","#258f2a","#3f9170","#69c27f","#2f5c35","#153d0d","#999ee8","#5157b0","#103575","#401f6b","#5a41a6","#59190f"] }
+            { name: "warm", colors: ["#FFFFF0","#FFFFFF","#FAEBD7","#D2B48C","#99715d","#4a310b","#3d3830","#292520","#3d2e22","#313a66","#224a31","#38330a","#736a1d","#999782","#5a337a","#82d7d9","#f5f37f","#e6bf35","#e67b17","#f0950c","#a1d158","#f7aa83","#bd5709","#e8571e","#eb4949","#ad3311","#e31b1b","#aa1be3","#3ac2e8","#658c5d"] },
+            { name: "cool", colors: ["#FFFFFF","#FAEBD7","#f0f0e4","#70736f","#c0c4c4","#c9cfc8","#2b0606","#152433","#000000","#03331a","#1a472c","#09544f","#571cb0","#1621c4","#c90c4b","#e69ad5","#a76cab","#de41f0","#bddecb","#158244","#0c614c","#1b8a8c","#52e1e3","#96dfeb","#0a64a8","#5c1e61","#999ee8","#5157b0","#341994","#0c1761"] },
+            { name: "clear", colors: ["#FFFFF0","#FFFFFF","#D2B48C","#70736f","#c0c4c4","#3b1d1d","#030000","#2b2a2a","#160859","#571cb0","#1621c4","#0d2185","#066b14","#047d34","#c41b1b","#82d7d9","#f2f072","#999ee8","#f0a35b","#c42585","#cf2b2b","#8a0f0f","#90cf3e","#258f2a","#136120","#315bc4","#17278a","#38178a","#46b4eb","#0da1b8"] },
+            { name: "soft", colors: ["#FFFFFF","#D2B48C","#BC8F8F","#e0bf87","#6e4931","#826653","#8B4513","#707050","#999782","#3d3830","#292520","#313a66","#243042","#224a31","#451733","#e8b8a0","#c42585","#bd4626","#82d7d9","#258f2a","#3f9170","#69c27f","#2f5c35","#153d0d","#999ee8","#5157b0","#103575","#401f6b","#5a41a6","#59190f"] }
         ];
 
         const tg = window.Telegram.WebApp;
         tg.expand();
         tg.ready();
 
-        function createSlides() {
+        // Создание контента
+        function initApp() {
             const wrapper = document.getElementById('palette-wrapper');
             paletteData.forEach(p => {
                 const slide = document.createElement('div');
                 slide.className = 'swiper-slide';
                 const grid = document.createElement('div');
                 grid.className = 'color-grid';
+                
                 p.colors.forEach(color => {
                     const circle = document.createElement('div');
                     circle.className = 'dot';
                     circle.style.backgroundColor = color;
                     grid.appendChild(circle);
                 });
+                
                 slide.appendChild(grid);
                 wrapper.appendChild(slide);
             });
 
-            new Swiper('.swiper', {
+            const swiper = new Swiper('.swiper', {
                 loop: true,
                 pagination: {
                     el: '.swiper-pagination',
@@ -195,20 +193,23 @@
             });
         }
 
-        async function startVideo() {
+        // Запуск камеры
+        async function setupCamera() {
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({
+                const constraints = {
                     video: { facingMode: "environment", width: { ideal: 3840 }, height: { ideal: 2160 } }
-                });
+                };
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
                 document.getElementById('video').srcObject = stream;
             } catch (err) {
+                // План Б: если не тянет 4К или не дает доступ
                 navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
                     .then(s => document.getElementById('video').srcObject = s);
             }
         }
 
-        createSlides();
-        startVideo();
+        initApp();
+        setupCamera();
     </script>
 </body>
 </html>
