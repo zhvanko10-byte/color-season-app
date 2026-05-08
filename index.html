@@ -2,214 +2,64 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Color Season App</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Палитры АРТ</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-
     <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            background: #000;
-            overflow: hidden;
-            font-family: sans-serif;
-        }
-
-        /* Задний фон — Камера */
-        #video-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-        }
-
-        #video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        /* Интерфейс */
-        #ui-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 2;
-            display: flex;
-            flex-direction: column;
-            pointer-events: none; /* Пропускает нажатия к Swiper */
-        }
-
-        /* Название палитры с черным контуром */
-        #header {
-            padding: 60px 20px 20px;
-            text-align: center;
-        }
-
-        #palette-name {
-            font-family: 'Playfair Display', serif;
-            font-size: 50px;
-            text-transform: uppercase;
-            letter-spacing: 5px;
-            font-style: italic;
-            margin: 0;
-            color: white;
-            /* Эффект обводки */
-            text-shadow: 
-                -1.5px -1.5px 0 #000,  
-                 1.5px -1.5px 0 #000,
-                -1.5px  1.5px 0 #000,
-                 1.5px  1.5px 0 #000,
-                 0 5px 15px rgba(0,0,0,0.6);
-        }
-
-        /* Слайдер */
-        .swiper {
-            width: 100%;
-            height: 100%;
-            pointer-events: auto;
-        }
-
-        .swiper-slide {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding-bottom: 60px;
-        }
-
-        /* Сетка цветов 5x6 */
-        .color-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 12px;
-            width: 88%;
-            max-width: 420px;
-        }
-
-        .dot {
-            aspect-ratio: 1 / 1;
-            border-radius: 50%;
-            border: 1.5px solid rgba(255,255,255,0.7);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-        }
-
-        /* Точки iPhone Style */
-        .swiper-pagination {
-            bottom: 50px !important;
-        }
-
-        .swiper-pagination-bullet {
-            width: 8px;
-            height: 8px;
-            background: #fff;
-            opacity: 0.4;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 5px rgba(0,0,0,0.8);
-        }
-
-        .swiper-pagination-bullet-active {
-            opacity: 1;
-            width: 24px; /* Эффект растянутой капсулы */
-            border-radius: 5px;
-            background: #fff;
-        }
+        body { font-family: sans-serif; background-color: #f0f0f0; padding: 20px; color: #333; }
+        .container { max-width: 500px; margin: 0 auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h1 { text-align: center; font-size: 20px; }
+        .palette-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 20px; }
+        .color-box { aspect-ratio: 1; border-radius: 8px; border: 1px solid #ddd; }
+        select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; }
     </style>
 </head>
 <body>
-
-    <div id="video-container">
-        <video id="video" autoplay playsinline muted></video>
-    </div>
-
-    <div id="ui-overlay">
-        <div id="header">
-            <h1 id="palette-name">LIGHT</h1>
-        </div>
-
-        <div class="swiper">
-            <div class="swiper-wrapper" id="palette-wrapper"></div>
-            <div class="swiper-pagination"></div>
-        </div>
+    <div class="container">
+        <h1>Твоя палитра</h1>
+        <select id="typeSelect" onchange="updatePalette()">
+            <option value="light">Light</option>
+            <option value="deep">Deep</option>
+            <option value="warm">Warm</option>
+            <option value="cool">Cool</option>
+            <option value="clear">Clear</option>
+            <option value="soft">Soft</option>
+        </select>
+        <div id="palette" class="palette-grid"></div>
     </div>
 
     <script>
-        const paletteData = [
-            { name: "light", colors: ["#FFFFF0","#FFFFFF","#FAEBD7","#D2B48C","#BC8F8F","#A0522D","#DEB887","#696969","#808080","#D3D3D3","#2F4F4F","#8FBC8F","#DC143C","#000080","#800080","#FFB6C1","#FF69B4","#DB7093","#FFA07A","#F0E68C","#6A5ACD","#87CEEB","#7B68EE","#4169E1","#00BFFF","#AFEEEE","#9ACD32","#008000","#3CB371","#008080"] },
-            { name: "deep", colors: ["#FFFFF0","#FFFFFF","#8B4513","#D2B48C","#BC8F8F","#3b1d1d","#030000","#2b2a2a","#454545","#160859","#0c300c","#0b4a0a","#0a4a41","#39522d","#380a19","#f0f26b","#bad45d","#d681d2","#e83c3c","#b82c2c","#c9240a","#3e0f59","#5d339c","#52070e","#52073c","#2f591e","#1e594b","#0c382d","#0d2185","#1e40e8"] },
-            { name: "warm", colors: ["#FFFFF0","#FFFFFF","#FAEBD7","#D2B48C","#99715d","#4a310b","#3d3830","#292520","#3d2e22","#313a66","#224a31","#38330a","#736a1d","#999782","#5a337a","#82d7d9","#f5f37f","#e6bf35","#e67b17","#f0950c","#a1d158","#f7aa83","#bd5709","#e8571e","#eb4949","#ad3311","#e31b1b","#aa1be3","#3ac2e8","#658c5d"] },
-            { name: "cool", colors: ["#FFFFFF","#FAEBD7","#f0f0e4","#70736f","#c0c4c4","#c9cfc8","#2b0606","#152433","#000000","#03331a","#1a472c","#09544f","#571cb0","#1621c4","#c90c4b","#e69ad5","#a76cab","#de41f0","#bddecb","#158244","#0c614c","#1b8a8c","#52e1e3","#96dfeb","#0a64a8","#5c1e61","#999ee8","#5157b0","#341994","#0c1761"] },
-            { name: "clear", colors: ["#FFFFF0","#FFFFFF","#D2B48C","#70736f","#c0c4c4","#3b1d1d","#030000","#2b2a2a","#160859","#571cb0","#1621c4","#0d2185","#066b14","#047d34","#c41b1b","#82d7d9","#f2f072","#999ee8","#f0a35b","#c42585","#cf2b2b","#8a0f0f","#90cf3e","#258f2a","#136120","#315bc4","#17278a","#38178a","#46b4eb","#0da1b8"] },
-            { name: "soft", colors: ["#FFFFFF","#D2B48C","#BC8F8F","#e0bf87","#6e4931","#826653","#8B4513","#707050","#999782","#3d3830","#292520","#313a66","#243042","#224a31","#451733","#e8b8a0","#c42585","#bd4626","#82d7d9","#258f2a","#3f9170","#69c27f","#2f5c35","#153d0d","#999ee8","#5157b0","#103575","#401f6b","#5a41a6","#59190f"] }
-        ];
+        // Твои обновленные данные из файла [cite: 2-187]
+        const COLOR_PALETTES = {
+            light: ["#FFFFF0", "#FFFFFF", "#FAEBD7", "#D2B48C", "#BC8F8F", "#A0522D", "#DEB887", "#696969", "#808080", "#D3D3D3", "#2F4F4F", "#8FBC8F", "#DC143C", "#000080", "#800080", "#FFB6C1", "#FF69B4", "#DB7093", "#FFA07A", "#F0E68C", "#6A5ACD", "#87CEEB", "#7B68EE", "#4169E1", "#00BFFF", "#AFEEEE", "#9ACD32", "#008000", "#3CB371", "#008080"],
+            deep: ["#FFFFF0", "#FFFFFF", "#8B4513", "#D2B48C", "#BC8F8F", "#3B1D1D", "#030000", "#2B2A2A", "#454545", "#160859", "#0C300C", "#0B4A0A", "#0A4A41", "#39522D", "#380A19", "#F0F26B", "#BAD45D", "#D681D2", "#E83C3C", "#B82C2C", "#C9240A", "#3E0F59", "#5D339C", "#52070E", "#52073C", "#2F591E", "#0C382D", "#0D2185", "#1E40E8", "#0F4E6E"],
+            warm: ["#FFFFF0", "#FFFFFF", "#FAEBD7", "#D2B48C", "#99715D", "#4A310B", "#3D3830", "#292520", "#3D2E22", "#313A66", "#224A31", "#38330A", "#736A1D", "#999782", "#5A337A", "#82D7D9", "#F5F37F", "#E6BF35", "#E67B17", "#F0950C", "#A1D158", "#F7AA83", "#BD5709", "#E8571E", "#EB4949", "#AD3311", "#E31B1B", "#AA1BE3", "#3AC2E8", "#658C5D"],
+            cool: ["#FFFFFF", "#FAEBD7", "#F0F0E4", "#70736F", "#C0C4C4", "#6D93A6", "#2B0606", "#152433", "#000000", "#03331A", "#1A472C", "#09544F", "#571CB0", "#1621C4", "#C90C4B", "#E69AD5", "#A76CAB", "#DE41F0", "#BDDECB", "#158244", "#0C614C", "#1B8A8C", "#52E1E3", "#96DFEB", "#0A64A8", "#5C1E61", "#999EE8", "#5157B0", "#341994", "#0C1761"],
+            clear: ["#FFFFF0", "#FFFFFF", "#D2B48C", "#70736F", "#C0C4C4", "#3B1D1D", "#030000", "#2B2A2A", "#160859", "#571CB0", "#1621C4", "#0D2185", "#066B14", "#047D34", "#C41B1B", "#82D7D9", "#F2F072", "#999EE8", "#F0A35B", "#C42585", "#CF2B2B", "#8A0F0F", "#90CF3E", "#14E09C", "#136120", "#315BC4", "#0EC2E6", "#38178A", "#46B4EB", "#0DA1B8"],
+            soft: ["#FFFFFF", "#D2B48C", "#BC8F8F", "#E0BF87", "#6E4931", "#826653", "#8B4513", "#707050", "#999782", "#3D3830", "#292520", "#313A66", "#243042", "#08535E", "#451733", "#e8b8a0", "#C456A0", "#bd4626", "#82d7d9", "#258f2a", "#3f9170", "#69c27f", "#2f5c35", "#153d0d", "#999ee8", "#5157b0", "#103575", "#401f6b", "#5a41a6", "#59190f"]
+        };
 
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.ready();
-
-        // Создание контента
-        function initApp() {
-            const wrapper = document.getElementById('palette-wrapper');
-            paletteData.forEach(p => {
-                const slide = document.createElement('div');
-                slide.className = 'swiper-slide';
-                const grid = document.createElement('div');
-                grid.className = 'color-grid';
-                
-                p.colors.forEach(color => {
-                    const circle = document.createElement('div');
-                    circle.className = 'dot';
-                    circle.style.backgroundColor = color;
-                    grid.appendChild(circle);
-                });
-                
-                slide.appendChild(grid);
-                wrapper.appendChild(slide);
-            });
-
-            const swiper = new Swiper('.swiper', {
-                loop: true,
-                pagination: {
-                    el: '.swiper-pagination',
-                    clickable: true,
-                },
-                on: {
-                    slideChange: function () {
-                        document.getElementById('palette-name').innerText = paletteData[this.realIndex].name;
-                    }
-                }
+        function updatePalette() {
+            const type = document.getElementById('typeSelect').value;
+            const container = document.getElementById('palette');
+            container.innerHTML = '';
+            
+            COLOR_PALETTES[type].forEach(color => {
+                const box = document.createElement('div');
+                box.className = 'color-box';
+                box.style.backgroundColor = color;
+                container.appendChild(box);
             });
         }
 
-        // Запуск камеры
-        async function setupCamera() {
-            try {
-                const constraints = {
-                    video: { facingMode: "environment", width: { ideal: 3840 }, height: { ideal: 2160 } }
-                };
-                const stream = await navigator.mediaDevices.getUserMedia(constraints);
-                document.getElementById('video').srcObject = stream;
-            } catch (err) {
-                // План Б: если не тянет 4К или не дает доступ
-                navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-                    .then(s => document.getElementById('video').srcObject = s);
+        // Инициализация при запуске
+        window.onload = () => {
+            updatePalette();
+            if (window.Telegram.WebApp) {
+                window.Telegram.WebApp.ready();
+                window.Telegram.WebApp.expand();
             }
-        }
-
-        initApp();
-        setupCamera();
+        };
     </script>
 </body>
 </html>
