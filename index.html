@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="uk">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Color Season App</title>
+    <title>Yliko Color Code</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -25,7 +25,7 @@
             color: white;
         }
 
-        /* ГЛАВНЫЙ ЭКРАН */
+        /* ГОЛОВНИЙ ЕКРАН */
         #main-page {
             position: absolute;
             top: 0; left: 0;
@@ -42,24 +42,32 @@
 
         #main-page h1 {
             font-family: 'Playfair Display', serif;
-            font-size: 42px;
+            font-size: 38px;
             font-style: italic;
-            margin-bottom: 15px;
+            margin-bottom: 25px;
+            letter-spacing: 1px;
+            padding: 0 20px;
         }
 
         .start-btn {
             background: none;
             color: white;
             border: 1px solid white;
-            padding: 15px 45px;
-            border-radius: 30px;
-            font-size: 12px;
+            padding: 16px 50px;
+            border-radius: 40px;
+            font-size: 13px;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 3px;
             cursor: pointer;
+            transition: all 0.3s ease;
         }
 
-        /* ЭКРАН ПРИЛОЖЕНИЯ */
+        .start-btn:active {
+            background: white;
+            color: black;
+        }
+
+        /* ЕКРАН ДОДАТКУ */
         #app-page {
             position: absolute;
             top: 0; left: 0;
@@ -120,6 +128,7 @@
             aspect-ratio: 1 / 1;
             border-radius: 50%;
             border: 1.5px solid rgba(255,255,255,0.7);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
         }
 
         .swiper-pagination-bullet { background: #fff; opacity: 0.4; }
@@ -130,8 +139,8 @@
 <body>
 
     <div id="main-page">
-        <h1>Colors</h1>
-        <button class="start-btn" onclick="startApp()">Начать</button>
+        <h1>Yliko Color Code</h1>
+        <button class="start-btn" onclick="startApp()">Почати</button>
     </div>
 
     <div id="app-page">
@@ -146,6 +155,7 @@
     </div>
 
     <script>
+        // Кольори згідно презентації
         const paletteData = [
             { name: "light", colors: ["#FFFFF0","#FFFFFF","#FAEBD7","#D2B48C","#BC8F8F","#A0522D","#DEB887","#696969","#808080","#D3D3D3","#2F4F4F","#8FBC8F","#DC143C","#000080","#800080","#FFB6C1","#FF69B4","#DB7093","#FFA07A","#F0E68C","#6A5ACD","#87CEEB","#7B68EE","#4169E1","#00BFFF","#AFEEEE","#9ACD32","#008000","#3CB371","#008080"] },
             { name: "deep", colors: ["#FFFFF0","#FFFFFF","#8B4513","#D2B48C","#BC8F8F","#3b1d1d","#030000","#2b2a2a","#454545","#160859","#0c300c","#0b4a0a","#0a4a41","#39522d","#380a19","#f0f26b","#bad45d","#d681d2","#e83c3c","#b82c2c","#c9240a","#3e0f59","#5d339c","#52070e","#52073c","#2f591e","#0c382d","#0d2185","#1e40e8","#0f4e6e"] },
@@ -188,10 +198,13 @@
 
         async function setupCamera() {
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment", width: { ideal: 3840 } } });
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: "environment", width: { ideal: 3840 } } 
+                });
                 document.getElementById('video').srcObject = stream;
             } catch (err) {
-                navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(s => document.getElementById('video').srcObject = s);
+                navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+                    .then(s => document.getElementById('video').srcObject = s);
             }
         }
         initSwiper();
