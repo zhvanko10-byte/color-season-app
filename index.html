@@ -5,17 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Ylikocolor code</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 
     <style>
         :root {
-            --bg: #000000; /* Чистий чорний фон */
-            --accent: #b08d57; 
+            --bg: #000000;
             --text: #ffffff;
-            --glass: rgba(255, 255, 255, 0.05);
+            --accent: #ffffff;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -24,7 +23,7 @@
             margin: 0; padding: 0;
             background-color: var(--bg);
             color: var(--text);
-            font-family: 'Montserrat', sans-serif;
+            font-family: 'Open Sans', sans-serif;
             height: 100vh; overflow: hidden;
         }
 
@@ -34,200 +33,178 @@
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
             flex-direction: column;
-            animation: fadeIn 0.4s ease;
         }
         .screen.active { display: flex; }
-
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         /* ГОЛОВНИЙ ЕКРАН */
         #home-screen {
             justify-content: center;
             align-items: center;
             text-align: center;
-            background-color: #000;
         }
 
-        .logo-area h1 {
+        .brand-name {
             font-family: 'Montserrat', sans-serif;
-            font-weight: 900;
             font-size: 3.5rem;
-            color: #ffffff; /* Білий колір */
-            margin: 0;
             text-transform: uppercase;
-            letter-spacing: -1px;
-            /* Чорна обводка */
+            color: #fff;
+            /* Та сама стильна обводка */
             text-shadow: 
                 -2px -2px 0 #000,  
                  2px -2px 0 #000,
                 -2px  2px 0 #000,
-                 2px  2px 0 #000,
-                 4px  4px 0 rgba(0,0,0,0.5);
+                 2px  2px 0 #000;
+            margin-bottom: 40px;
+            line-height: 1;
         }
 
-        .logo-area p {
-            letter-spacing: 5px;
-            font-size: 0.7rem;
-            color: #555;
-            margin-bottom: 50px;
-            text-transform: uppercase;
-        }
-
-        .nav-menu {
+        .main-nav {
             display: flex;
             flex-direction: column;
             gap: 15px;
-            width: 85%;
-            max-width: 320px;
+            width: 80%;
+            max-width: 300px;
         }
 
-        .btn-main {
-            padding: 18px;
-            border-radius: 50px; /* Круглі кнопки */
-            border: 2px solid #ffffff;
-            background: transparent;
-            color: white;
+        .btn {
+            padding: 20px;
+            border-radius: 50px;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 1px;
             cursor: pointer;
             transition: 0.3s;
+            border: 2px solid #fff;
+            font-size: 0.9rem;
         }
 
-        .btn-main.primary {
-            background-color: #ffffff;
-            color: #000000;
-        }
+        .btn-filled { background: #fff; color: #000; }
+        .btn-outline { background: transparent; color: #fff; }
 
-        .btn-main:active { transform: scale(0.95); }
-
-        /* ЕКРАН КАМЕРИ */
+        /* КАМЕРА ТА ПАЛІТРИ */
         #camera-screen { background: #000; }
-        .video-container { flex: 1; position: relative; overflow: hidden; }
-        #webcam { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
-        .camera-ui { position: absolute; bottom: 0; left: 0; width: 100%; padding: 20px; background: linear-gradient(transparent, rgba(0,0,0,0.8)); }
-        .palette-bar { display: flex; gap: 15px; overflow-x: auto; padding: 10px 0; scrollbar-width: none; }
-        .color-dot { min-width: 55px; height: 55px; border-radius: 50%; border: 2px solid white; flex-shrink: 0; }
+        .video-wrapper { flex: 1; position: relative; }
+        #v-stream { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+        
+        .palette-overlay {
+            position: absolute;
+            bottom: 30px;
+            left: 0; width: 100%;
+            padding: 0 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-        /* ТЕСТ (SWIPER) */
-        #test-screen { padding-top: 60px; background: #000; }
-        .swiper { width: 85%; height: 75vh; }
-        .swiper-slide { background: #fff; border-radius: 30px; color: #000; overflow: hidden; display: flex; flex-direction: column; }
-        .slide-img { width: 100%; height: 55%; background-size: cover; background-position: center; }
-        .slide-content { padding: 20px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
-        .slide-content h2 { margin: 0; font-weight: 900; text-transform: uppercase; font-size: 1.2rem; }
-        .test-btns { display: flex; gap: 10px; }
-        .t-btn { flex: 1; padding: 16px; border: none; border-radius: 15px; font-weight: 700; cursor: pointer; text-transform: uppercase; }
-        .t-btn-no { background: #f0f0f0; color: #888; }
-        .t-btn-yes { background: #000; color: #fff; }
+        .dots-row {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            width: 100%;
+            padding: 10px 0;
+            scrollbar-width: none;
+        }
+        .dot {
+            min-width: 60px; height: 60px;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            flex-shrink: 0;
+        }
 
-        /* РЕЗУЛЬТАТ */
-        #result-screen { background: #fff; color: #000; justify-content: center; align-items: center; padding: 40px; text-align: center; }
-        .close-btn { position: absolute; top: 20px; left: 20px; width: 40px; height: 40px; border-radius: 50%; background: rgba(0,0,0,0.2); border: none; color: white; display: flex; justify-content: center; align-items: center; z-index: 100; }
+        /* ТЕСТ */
+        #quiz-screen { background: #000; padding-top: 60px; }
+        .swiper { width: 85%; height: 70vh; }
+        .swiper-slide {
+            background: #fff; border-radius: 30px; color: #000;
+            overflow: hidden; display: flex; flex-direction: column;
+        }
+        .q-img { width: 100%; height: 50%; background-size: cover; background-position: center; }
+        .q-content { padding: 20px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        .q-btns { display: flex; gap: 10px; }
+        .q-btn { flex: 1; padding: 15px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; }
+
+        .back-link {
+            position: absolute; top: 20px; left: 20px;
+            color: #fff; font-size: 1.5rem; z-index: 100; background: none; border: none;
+        }
     </style>
 </head>
 <body>
 
     <div class="screen active" id="home-screen">
-        <div class="logo-area">
-            <h1>Ylikocolor code</h1>
-            <p>Analysis & Palette</p>
-        </div>
-        <div class="nav-menu">
-            <button class="btn-main primary" onclick="goTo('camera-screen'); startWebcam();">Почати</button>
-            <button class="btn-main" onclick="goTo('test-screen')">Пройти тест</button>
+        <h1 class="brand-name">Ylikocolor code</h1>
+        <div class="main-nav">
+            <button class="btn btn-filled" onclick="openCam()">ПОЧАТИ</button>
+            <button class="btn btn-outline" onclick="openTest()">ПРОЙТИ ТЕСТ</button>
         </div>
     </div>
 
     <div class="screen" id="camera-screen">
-        <button class="close-btn" onclick="stopWebcam(); goTo('home-screen');">
-            <i class="fa-solid fa-arrow-left"></i>
-        </button>
-        <div class="video-container">
-            <video id="webcam" autoplay playsinline></video>
-            <div class="camera-ui">
-                <div class="palette-bar">
-                    <div class="color-dot" style="background: #f4dcd6;"></div>
-                    <div class="color-dot" style="background: #e2f0f9;"></div>
-                    <div class="color-dot" style="background: #f9f2e2;"></div>
-                    <div class="color-dot" style="background: #e8f5e9;"></div>
-                    <div class="color-dot" style="background: #f3e5f5;"></div>
+        <button class="back-link" onclick="closeCam()"><i class="fa-solid fa-chevron-left"></i></button>
+        <div class="video-wrapper">
+            <video id="v-stream" autoplay playsinline></video>
+            <div class="palette-overlay">
+                <div class="dots-row">
+                    <div class="dot" style="background: #FFD1DC;"></div>
+                    <div class="dot" style="background: #B0E0E6;"></div>
+                    <div class="dot" style="background: #F5F5DC;"></div>
+                    <div class="dot" style="background: #98FF98;"></div>
+                    <div class="dot" style="background: #E6E6FA;"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="screen" id="test-screen">
-        <button class="close-btn" onclick="goTo('home-screen')">
-            <i class="fa-solid fa-xmark"></i>
-        </button>
+    <div class="screen" id="quiz-screen">
+        <button class="back-link" onclick="navTo('home-screen')"><i class="fa-solid fa-xmark"></i></button>
         <div class="swiper">
-            <div class="swiper-wrapper" id="test-wrapper">
-                </div>
+            <div class="swiper-wrapper" id="q-list"></div>
         </div>
-    </div>
-
-    <div class="screen" id="result-screen">
-        <span style="color: #999; font-size: 0.8rem; letter-spacing: 2px; text-transform: uppercase;">Ваш результат:</span>
-        <h1 id="res-name" style="font-weight: 900; text-transform: uppercase; font-size: 2rem; margin: 10px 0;"></h1>
-        <p id="res-info" style="margin-bottom: 40px; color: #666; font-size: 0.9rem; line-height: 1.5;"></p>
-        <button class="btn-main" style="width: 100%; background: #000; color: #fff; border: none;" onclick="goTo('camera-screen'); startWebcam();">Відкрити палітру</button>
-        <button class="btn-main" style="width: 100%; margin-top: 15px; color: #888; border-color: #eee;" onclick="goTo('home-screen')">На головну</button>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script>
-        const testData = [
-            { id: 'light', name: 'Світлий колорит', img: 'https://images.unsplash.com/photo-1509967419530-da38b4704bc6?q=80&w=500', info: 'Волосся та очі світлі. Ваша зовнішність випромінює м’якість. Пастельні тони — ваш ідеальний вибір.' },
-            { id: 'deep', name: 'Глибокий колорит', img: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?q=80&w=500', info: 'Темне волосся та насичений погляд. Вам неймовірно пасують глибокі, благородні кольори.' },
-            { id: 'warm', name: 'Теплий колорит', img: 'https://images.unsplash.com/photo-1520333789090-1afc82db536a?q=80&w=500', info: 'Золотисті відблиски у волоссі та теплий підтон шкіри. Ваші кольори — медовий, теракотовий, оливковий.' },
-            { id: 'cool', name: 'Холодний колорит', img: 'https://images.unsplash.com/photo-1499952127939-9bbf5af6c51c?q=80&w=500', info: 'Попелясте волосся та прохолодна шкіра. Обирайте сині, сріблясті та ягідні тони.' }
+        const testItems = [
+            { t: 'Світлий колорит', d: 'Світле волосся та очі.', i: 'https://images.unsplash.com/photo-1509967419530-da38b4704bc6?w=400' },
+            { t: 'Темний колорит', d: 'Насичені темні риси.', i: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400' }
         ];
 
-        const wrapper = document.getElementById('test-wrapper');
-        testData.forEach(item => {
-            const slide = document.createElement('div');
-            slide.className = 'swiper-slide';
-            slide.innerHTML = `
-                <div class="slide-img" style="background-image: url('${item.img}')"></div>
-                <div class="slide-content">
-                    <div>
-                        <h2>${item.name}</h2>
-                        <p style="font-size: 0.85rem; color: #555; margin-top: 10px;">${item.info}</p>
+        const qList = document.getElementById('q-list');
+        testItems.forEach(item => {
+            qList.innerHTML += `
+                <div class="swiper-slide">
+                    <div class="q-img" style="background-image:url('${item.i}')"></div>
+                    <div class="q-content">
+                        <h2>${item.t}</h2>
+                        <p>${item.d}</p>
+                        <div class="q-btns">
+                            <button class="q-btn" style="background:#eee" onclick="swiper.slideNext()">НІ</button>
+                            <button class="q-btn" style="background:#000; color:#fff" onclick="alert('Ваш тип: ${item.t}')">ТАК</button>
+                        </div>
                     </div>
-                    <div class="test-btns">
-                        <button class="t-btn t-btn-no" onclick="swiper.slideNext()">НІ</button>
-                        <button class="t-btn t-btn-yes" onclick="finishTest('${item.name}', '${item.info}')">ТАК</button>
-                    </div>
-                </div>
-            `;
-            wrapper.appendChild(slide);
+                </div>`;
         });
 
-        const swiper = new Swiper('.swiper', { effect: 'cards', grabCursor: true });
+        const swiper = new Swiper('.swiper', { effect: 'cards' });
 
-        function goTo(id) {
+        function navTo(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
         }
 
-        function finishTest(name, info) {
-            document.getElementById('res-name').innerText = name;
-            document.getElementById('res-info').innerText = info;
-            goTo('result-screen');
-        }
-
         let stream = null;
-        async function startWebcam() {
-            try {
-                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
-                document.getElementById('webcam').srcObject = stream;
-            } catch (e) { console.log("Камера недоступна"); }
+        async function openCam() {
+            navTo('camera-screen');
+            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+            document.getElementById('v-stream').srcObject = stream;
         }
 
-        function stopWebcam() {
-            if (stream) stream.getTracks().forEach(t => t.stop());
+        function closeCam() {
+            if(stream) stream.getTracks().forEach(t => t.stop());
+            navTo('home-screen');
         }
+
+        function openTest() { navTo('quiz-screen'); swiper.update(); }
     </script>
 </body>
 </html>
