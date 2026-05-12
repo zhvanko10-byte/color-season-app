@@ -3,143 +3,231 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Season Palette</title>
+    <title>Ylikocolor code</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-    
+
     <style>
         :root {
-            --bg-dark: #121212;
-            --gold: #b08d57;
-            --white: #ffffff;
-            --gray: #2d2d2d;
+            --bg: #000000; /* Чистий чорний фон */
+            --accent: #b08d57; 
+            --text: #ffffff;
+            --glass: rgba(255, 255, 255, 0.05);
         }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body, html {
             margin: 0; padding: 0;
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            background-color: var(--bg-dark);
-            color: white; height: 100%; overflow: hidden;
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Montserrat', sans-serif;
+            height: 100vh; overflow: hidden;
         }
 
-        /* ГОЛОВНА СТОРІНКА */
-        .home-screen {
-            display: flex; flex-direction: column; justify-content: center;
-            align-items: center; height: 100vh; text-align: center; padding: 20px;
+        /* ЕКРАНИ */
+        .screen {
+            display: none;
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            flex-direction: column;
+            animation: fadeIn 0.4s ease;
+        }
+        .screen.active { display: flex; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* ГОЛОВНИЙ ЕКРАН */
+        #home-screen {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background-color: #000;
         }
 
-        .home-screen h1 { font-size: 2.8rem; margin-bottom: 5px; letter-spacing: 3px; font-weight: 300; }
-        .home-screen p { color: #888; font-size: 0.9rem; letter-spacing: 1px; margin-bottom: 30px; }
-
-        .main-btn {
-            padding: 20px 50px; background-color: var(--gold); color: white;
-            border: none; border-radius: 50px; font-weight: bold; font-size: 1rem;
-            cursor: pointer; box-shadow: 0 10px 20px rgba(0,0,0,0.3); transition: 0.3s;
+        .logo-area h1 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 900;
+            font-size: 3.5rem;
+            color: #ffffff; /* Білий колір */
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+            /* Чорна обводка */
+            text-shadow: 
+                -2px -2px 0 #000,  
+                 2px -2px 0 #000,
+                -2px  2px 0 #000,
+                 2px  2px 0 #000,
+                 4px  4px 0 rgba(0,0,0,0.5);
         }
 
-        /* ТЕСТОВЕ ВІКНО */
-        #quiz-container {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: var(--bg-dark); z-index: 1000;
+        .logo-area p {
+            letter-spacing: 5px;
+            font-size: 0.7rem;
+            color: #555;
+            margin-bottom: 50px;
+            text-transform: uppercase;
         }
 
-        .close-x { position: absolute; top: 20px; right: 20px; font-size: 30px; color: white; background: none; border: none; cursor: pointer; z-index: 1100; }
-
-        .swiper { width: 85%; max-width: 360px; height: 80vh; margin-top: 60px; }
-
-        .swiper-slide {
-            background: var(--white); border-radius: 30px; color: var(--gray);
-            overflow: hidden; display: flex; flex-direction: column;
+        .nav-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 85%;
+            max-width: 320px;
         }
 
-        .card-img { width: 100%; height: 50%; background-size: cover; background-position: center; }
-
-        .card-body { padding: 20px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
-
-        h2 { margin: 0; color: var(--gold); font-size: 1.25rem; text-align: center; }
-        .info-text { font-size: 0.85rem; line-height: 1.4; margin: 10px 0; color: #444; }
-        .test-hint { background: #f9f6f2; padding: 10px; border-radius: 12px; font-size: 0.8rem; border-left: 4px solid var(--gold); }
-
-        .action-btns { display: flex; gap: 10px; margin-top: 15px; }
-
-        .btn-ui { flex: 1; padding: 16px; border: none; border-radius: 15px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
-        .btn-no { background: #f0f0f0; color: #777; }
-        .btn-yes { background: var(--gold); color: white; }
-
-        #result-popup {
-            display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: white; z-index: 1200; flex-direction: column; justify-content: center;
-            align-items: center; padding: 30px; text-align: center; color: var(--gray);
+        .btn-main {
+            padding: 18px;
+            border-radius: 50px; /* Круглі кнопки */
+            border: 2px solid #ffffff;
+            background: transparent;
+            color: white;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: 0.3s;
         }
+
+        .btn-main.primary {
+            background-color: #ffffff;
+            color: #000000;
+        }
+
+        .btn-main:active { transform: scale(0.95); }
+
+        /* ЕКРАН КАМЕРИ */
+        #camera-screen { background: #000; }
+        .video-container { flex: 1; position: relative; overflow: hidden; }
+        #webcam { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+        .camera-ui { position: absolute; bottom: 0; left: 0; width: 100%; padding: 20px; background: linear-gradient(transparent, rgba(0,0,0,0.8)); }
+        .palette-bar { display: flex; gap: 15px; overflow-x: auto; padding: 10px 0; scrollbar-width: none; }
+        .color-dot { min-width: 55px; height: 55px; border-radius: 50%; border: 2px solid white; flex-shrink: 0; }
+
+        /* ТЕСТ (SWIPER) */
+        #test-screen { padding-top: 60px; background: #000; }
+        .swiper { width: 85%; height: 75vh; }
+        .swiper-slide { background: #fff; border-radius: 30px; color: #000; overflow: hidden; display: flex; flex-direction: column; }
+        .slide-img { width: 100%; height: 55%; background-size: cover; background-position: center; }
+        .slide-content { padding: 20px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        .slide-content h2 { margin: 0; font-weight: 900; text-transform: uppercase; font-size: 1.2rem; }
+        .test-btns { display: flex; gap: 10px; }
+        .t-btn { flex: 1; padding: 16px; border: none; border-radius: 15px; font-weight: 700; cursor: pointer; text-transform: uppercase; }
+        .t-btn-no { background: #f0f0f0; color: #888; }
+        .t-btn-yes { background: #000; color: #fff; }
+
+        /* РЕЗУЛЬТАТ */
+        #result-screen { background: #fff; color: #000; justify-content: center; align-items: center; padding: 40px; text-align: center; }
+        .close-btn { position: absolute; top: 20px; left: 20px; width: 40px; height: 40px; border-radius: 50%; background: rgba(0,0,0,0.2); border: none; color: white; display: flex; justify-content: center; align-items: center; z-index: 100; }
     </style>
 </head>
 <body>
 
-    <div class="home-screen">
-        <h1>SEASON PALETTE</h1>
-        <p>ВИЗНАЧ СВІЙ ПРИРОДНИЙ ТИП КРАСИ</p>
-        <button class="main-btn" onclick="startQuiz()">ПОЧАТИ ТЕСТ</button>
+    <div class="screen active" id="home-screen">
+        <div class="logo-area">
+            <h1>Ylikocolor code</h1>
+            <p>Analysis & Palette</p>
+        </div>
+        <div class="nav-menu">
+            <button class="btn-main primary" onclick="goTo('camera-screen'); startWebcam();">Почати</button>
+            <button class="btn-main" onclick="goTo('test-screen')">Пройти тест</button>
+        </div>
     </div>
 
-    <div id="quiz-container">
-        <button class="close-x" onclick="exitQuiz()">✕</button>
-        <div class="swiper">
-            <div class="swiper-wrapper" id="slides-wrapper"></div>
-        </div>
-
-        <div id="result-popup">
-            <div class="res-box">
-                <span style="color: #bbb; font-size: 0.7rem; letter-spacing: 2px;">ВАШ КОЛОРИТ:</span>
-                <h1 id="final-title"></h1>
-                <p id="final-desc" style="color: #666; font-size: 0.95rem; margin-bottom: 25px;"></p>
-                <button class="btn-ui btn-yes" style="width: 100%;" onclick="openPalette()">ВІДКРИТИ ПАЛІТРУ</button>
-                <button class="btn-ui btn-no" style="width: 100%; margin-top: 10px; background: none;" onclick="exitQuiz()">На головну</button>
+    <div class="screen" id="camera-screen">
+        <button class="close-btn" onclick="stopWebcam(); goTo('home-screen');">
+            <i class="fa-solid fa-arrow-left"></i>
+        </button>
+        <div class="video-container">
+            <video id="webcam" autoplay playsinline></video>
+            <div class="camera-ui">
+                <div class="palette-bar">
+                    <div class="color-dot" style="background: #f4dcd6;"></div>
+                    <div class="color-dot" style="background: #e2f0f9;"></div>
+                    <div class="color-dot" style="background: #f9f2e2;"></div>
+                    <div class="color-dot" style="background: #e8f5e9;"></div>
+                    <div class="color-dot" style="background: #f3e5f5;"></div>
+                </div>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <div class="screen" id="test-screen">
+        <button class="close-btn" onclick="goTo('home-screen')">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+        <div class="swiper">
+            <div class="swiper-wrapper" id="test-wrapper">
+                </div>
+        </div>
+    </div>
 
+    <div class="screen" id="result-screen">
+        <span style="color: #999; font-size: 0.8rem; letter-spacing: 2px; text-transform: uppercase;">Ваш результат:</span>
+        <h1 id="res-name" style="font-weight: 900; text-transform: uppercase; font-size: 2rem; margin: 10px 0;"></h1>
+        <p id="res-info" style="margin-bottom: 40px; color: #666; font-size: 0.9rem; line-height: 1.5;"></p>
+        <button class="btn-main" style="width: 100%; background: #000; color: #fff; border: none;" onclick="goTo('camera-screen'); startWebcam();">Відкрити палітру</button>
+        <button class="btn-main" style="width: 100%; margin-top: 15px; color: #888; border-color: #eee;" onclick="goTo('home-screen')">На головну</button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script>
-        // Ось тут я вставив прямі посилання на картинки
-        const quizData = [
-            { id: "light", title: "Світлий колорит (Light)", img: "https://googleusercontent.com/image_generation_content/3", desc: "Волосся світле від самого кореня, брови та вії теж світлі. Очі дуже світлі: блакитні, сірі.", test: "Чорний колір “з’їдає” вас — видно спочатку одяг, а не обличчя." },
-            { id: "deep", title: "Глибокий темний колорит (Deep)", img: "https://googleusercontent.com/image_generation_content/4", desc: "Дуже темне волосся, темні очі та густі темні вії. Обличчя виразне навіть без макіяжу.", test: "У чисто чорному кольорі ви виглядаєте дорого та яскраво." },
-            { id: "cool", title: "Холодний колорит (Cool)", img: "https://googleusercontent.com/image_generation_content/3", desc: "Волосся без золота (попелясте, сиве). Очі холодні. Шкіра з рожевим підтоном.", test: "Срібло освіжає обличчя, а золото робить його жовтуватим." },
-            { id: "warm", title: "Теплий колорит (Warm)", img: "https://googleusercontent.com/image_generation_content/4", desc: "Волосся з теплим підтоном (руде, медове). Часто є ластовиння. Вени зелені.", test: "Теплі кольори (карамель, теракот) роблять вас свіжішою." },
-            { id: "clear", title: "Контрастний колорит (Clear)", img: "https://googleusercontent.com/image_generation_content/5", desc: "Високий контраст: темні очі + світле волосся або навпаки. Типаж “Білосніжка”.", test: "Вам пасують чіткі контрасти: чорний з білим, яскраво-червоний." },
-            { id: "soft", title: "М’який збалансований колорит (Soft)", img: "https://googleusercontent.com/image_generation_content/5", desc: "Немає різких контрастів. Все виглядає “середньо”. Обличчя м’яке і спокійне.", test: "Яскраві кольори “перекрикують” вас, краще виглядають спокійні відтінки." }
+        const testData = [
+            { id: 'light', name: 'Світлий колорит', img: 'https://images.unsplash.com/photo-1509967419530-da38b4704bc6?q=80&w=500', info: 'Волосся та очі світлі. Ваша зовнішність випромінює м’якість. Пастельні тони — ваш ідеальний вибір.' },
+            { id: 'deep', name: 'Глибокий колорит', img: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?q=80&w=500', info: 'Темне волосся та насичений погляд. Вам неймовірно пасують глибокі, благородні кольори.' },
+            { id: 'warm', name: 'Теплий колорит', img: 'https://images.unsplash.com/photo-1520333789090-1afc82db536a?q=80&w=500', info: 'Золотисті відблиски у волоссі та теплий підтон шкіри. Ваші кольори — медовий, теракотовий, оливковий.' },
+            { id: 'cool', name: 'Холодний колорит', img: 'https://images.unsplash.com/photo-1499952127939-9bbf5af6c51c?q=80&w=500', info: 'Попелясте волосся та прохолодна шкіра. Обирайте сині, сріблясті та ягідні тони.' }
         ];
 
-        const wrapper = document.getElementById('slides-wrapper');
-        quizData.forEach(item => {
+        const wrapper = document.getElementById('test-wrapper');
+        testData.forEach(item => {
             const slide = document.createElement('div');
             slide.className = 'swiper-slide';
             slide.innerHTML = `
-                <div class="card-img" style="background-image: url('${item.img}')"></div>
-                <div class="card-body">
+                <div class="slide-img" style="background-image: url('${item.img}')"></div>
+                <div class="slide-content">
                     <div>
-                        <h2>${item.title}</h2>
-                        <p class="info-text">${item.desc}</p>
-                        <div class="test-hint"><strong>ТЕСТ:</strong> ${item.test}</div>
+                        <h2>${item.name}</h2>
+                        <p style="font-size: 0.85rem; color: #555; margin-top: 10px;">${item.info}</p>
                     </div>
-                    <div class="action-btns">
-                        <button class="btn-ui btn-no" onclick="nextSlide()">НІ</button>
-                        <button class="btn-ui btn-yes" onclick="showResult('${item.title}', '${item.desc}', '${item.id}')">ТАК</button>
+                    <div class="test-btns">
+                        <button class="t-btn t-btn-no" onclick="swiper.slideNext()">НІ</button>
+                        <button class="t-btn t-btn-yes" onclick="finishTest('${item.name}', '${item.info}')">ТАК</button>
                     </div>
                 </div>
             `;
             wrapper.appendChild(slide);
         });
 
-        let swiper = new Swiper('.swiper', { effect: 'cards', grabCursor: true });
-        let currentResultId = "";
+        const swiper = new Swiper('.swiper', { effect: 'cards', grabCursor: true });
 
-        function startQuiz() { document.getElementById('quiz-container').style.display = 'block'; swiper.update(); }
-        function exitQuiz() { document.getElementById('quiz-container').style.display = 'none'; document.getElementById('result-screen').style.display = 'none'; }
-        function nextSlide() { if (swiper.isEnd) swiper.slideTo(0); else swiper.slideNext(); }
-        function showResult(title, desc, id) { currentResultId = id; document.getElementById('result-popup').style.display = 'flex'; document.getElementById('final-title').innerText = title; document.getElementById('final-desc').innerText = desc; }
-        function openPalette() { alert("Перехід до палітри: " + currentResultId); exitQuiz(); }
+        function goTo(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        function finishTest(name, info) {
+            document.getElementById('res-name').innerText = name;
+            document.getElementById('res-info').innerText = info;
+            goTo('result-screen');
+        }
+
+        let stream = null;
+        async function startWebcam() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+                document.getElementById('webcam').srcObject = stream;
+            } catch (e) { console.log("Камера недоступна"); }
+        }
+
+        function stopWebcam() {
+            if (stream) stream.getTracks().forEach(t => t.stop());
+        }
     </script>
 </body>
 </html>
