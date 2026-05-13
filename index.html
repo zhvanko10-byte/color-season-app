@@ -23,6 +23,7 @@
             -webkit-tap-highlight-color: transparent;
         }
 
+        /* Перемикач мови */
         .lang-switch {
             position: absolute; top: 30px; right: 30px;
             z-index: 500; font-size: 12px; letter-spacing: 2px;
@@ -30,6 +31,7 @@
         .lang-btn { background: none; border: none; color: #555; cursor: pointer; padding: 5px; font-family: 'Montserrat', sans-serif; }
         .lang-btn.active { color: white; font-weight: bold; }
 
+        /* Сторінки */
         .page {
             position: absolute; top: 0; left: 0;
             width: 100%; height: 100%;
@@ -42,6 +44,7 @@
         }
         .page.active { display: flex; }
 
+        /* Головна */
         #main-page h1 {
             font-family: 'Playfair Display', serif;
             font-size: 38px; font-style: italic;
@@ -62,6 +65,7 @@
             cursor: pointer; z-index: 1000;
         }
 
+        /* Камера */
         #video-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
         #video { width: 100%; height: 100%; object-fit: cover; }
         #ui-overlay {
@@ -78,6 +82,7 @@
         .color-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; width: 85%; max-width: 400px; margin: auto; }
         .dot { aspect-ratio: 1/1; border-radius: 50%; border: 1px solid rgba(255,255,255,0.3); }
 
+        /* Тест */
         #test-container {
             position: relative; width: 85%; max-width: 380px; height: 75vh;
             display: flex; align-items: center; justify-content: center;
@@ -88,7 +93,12 @@
             border-radius: 24px; display: none; flex-direction: column; overflow: hidden;
         }
         .test-card.active { display: flex; }
-        .test-card img { width: 100%; height: 55%; object-fit: cover; }
+        .test-card img { 
+            width: 100%; 
+            height: 55%; 
+            object-fit: cover; 
+            background: #222; /* фон, якщо картинка вантажиться */
+        }
         
         .test-content { padding: 25px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; text-align: center; }
         .test-content h2 { font-family: 'Playfair Display', serif; font-style: italic; font-size: 26px; margin: 0; }
@@ -138,7 +148,7 @@
     <script>
         const dict = { uk: { start: "Почати", test: "Тестування", yes: "Так", no: "Ні" }, en: { start: "Start", test: "Testing", yes: "Yes", no: "No" } };
         let currentLang = 'uk';
-        let paletteSwiper = null; // Глобальна змінна для керування палітрами
+        let paletteSwiper = null;
 
         const paletteData = [
             { id: "light", name: "light", colors: ["#FFFFF0","#FFFFFF","#FAEBD7","#D2B48C","#BC8F8F","#A0522D","#DEB887","#696969","#808080","#D3D3D3","#2F4F4F","#8FBC8F","#DC143C","#000080","#800080","#FFB6C1","#FF69B4","#DB7093","#FFA07A","#F0E68C","#6A5ACD","#87CEEB","#7B68EE","#4169E1","#00BFFF","#AFEEEE","#9ACD32","#008000","#3CB371","#008080"] },
@@ -149,13 +159,14 @@
             { id: "soft", name: "soft", colors: ["#FFFFFF","#D2B48C","#BC8F8F","#e0bf87","#6e4931","#826653","#8B4513","#707050","#999782","#3d3830","#292520","#313a66","#243042","#08535e","#451733","#e8b8a0","#c456a0","#bd4626","#82d7d9","#258f2a","#3f9170","#69c27f","#2f5c35","#153d0d","#999ee8","#5157b0","#103575","#401f6b","#5a41a6","#59190f"] }
         ];
 
+        // ТУТ Я ЗМІНИВ .jpg НА .png
         const testData = [
-            { id: "light", img: "img/light.jpg", uk: { t: "Light (Світлий)", d: "Світле волосся та очі. Низький контраст." }, en: { t: "Light", d: "Light hair and eyes. Low contrast." } },
-            { id: "deep", img: "img/deep.jpg", uk: { t: "Deep (Глибокий)", d: "Темне насичене волосся та очі." }, en: { t: "Deep", d: "Dark saturated hair and eyes." } },
-            { id: "warm", img: "img/warm.jpg", uk: { t: "Warm (Теплий)", d: "Золотистий підтон волосся та шкіри." }, en: { t: "Warm", d: "Golden hair and skin undertones." } },
-            { id: "cool", img: "img/cool.jpg", uk: { t: "Cool (Холодний)", d: "Попелястий підтон, рожева шкіра." }, en: { t: "Cool", d: "Ashy undertones, pinkish skin." } },
-            { id: "clear", img: "img/clear.jpg", uk: { t: "Clear (Яскравий)", d: "Високий контраст і яскраві очі." }, en: { t: "Clear", d: "High contrast and bright eyes." } },
-            { id: "soft", img: "img/soft.jpg", uk: { t: "Soft (М'який)", d: "Приглушені відтінки зовнішності." }, en: { t: "Soft", d: "Muted, blended appearance." } }
+            { id: "light", img: "img/light.png", uk: { t: "Light (Світлий)", d: "Світле волосся та очі. Низький контраст." }, en: { t: "Light", d: "Light hair and eyes. Low contrast." } },
+            { id: "deep",  img: "img/deep.png",  uk: { t: "Deep (Глибокий)", d: "Темне насичене волосся та очі." }, en: { t: "Deep", d: "Dark saturated hair and eyes." } },
+            { id: "warm",  img: "img/warm.png",  uk: { t: "Warm (Теплий)", d: "Золотистий підтон волосся та шкіри." }, en: { t: "Warm", d: "Golden hair and skin undertones." } },
+            { id: "cool",  img: "img/cool.png",  uk: { t: "Cool (Холодний)", d: "Попелястий підтон, рожева шкіра." }, en: { t: "Cool", d: "Ashy undertones, pinkish skin." } },
+            { id: "clear", img: "img/clear.png", uk: { t: "Clear (Яскравий)", d: "Високий контраст і яскраві очі." }, en: { t: "Clear", d: "High contrast and bright eyes." } },
+            { id: "soft",  img: "img/soft.png",  uk: { t: "Soft (М'який)", d: "Приглушені відтінки зовнішності." }, en: { t: "Soft", d: "Muted, blended appearance." } }
         ];
 
         let currentCardIndex = 0;
@@ -183,7 +194,7 @@
                 const cardDiv = document.createElement('div');
                 cardDiv.className = `test-card ${index === currentCardIndex ? 'active' : ''}`;
                 cardDiv.innerHTML = `
-                    <img src="${card.img}" alt="${card.id}" onerror="this.style.display='none'">
+                    <img src="${card.img}" alt="${card.id}">
                     <div class="test-content">
                         <div><h2>${card[currentLang].t}</h2><p>${card[currentLang].d}</p></div>
                         <div class="test-actions">
@@ -202,14 +213,9 @@
             renderTestCards();
         }
 
-        // ПЕРЕХІД ДО ПАЛІТРИ ПІСЛЯ ТЕСТУ
         function finishTest(typeId) {
-            // 1. Знаходимо індекс цієї палітри в масиві
             const targetIndex = paletteData.findIndex(p => p.id === typeId);
-            
-            // 2. Вмикаємо камеру
             openCamera().then(() => {
-                // 3. Перемикаємо слайдер на потрібну палітру (без анімації '0', щоб миттєво)
                 if(paletteSwiper) {
                     paletteSwiper.slideToLoop(targetIndex, 0);
                     document.getElementById('palette-name').innerText = paletteData[targetIndex].name;
@@ -252,7 +258,6 @@
                 wrapper.appendChild(slide);
             });
 
-            // Зберігаємо інстанс у змінну
             paletteSwiper = new Swiper('.palette-swiper', {
                 loop: true,
                 pagination: { el: '.swiper-pagination', clickable: true },
