@@ -125,6 +125,7 @@
             position: absolute; top: 30px; left: 20px;
             background: none; border: none; color: white;
             font-size: 24px; cursor: pointer; pointer-events: auto;
+            z-index: 10;
         }
 
         #palette-name {
@@ -158,6 +159,7 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            pointer-events: auto !important; /* Гарантуємо клікабельність */
         }
 
         .img-placeholder {
@@ -179,12 +181,13 @@
 
         .test-content p { font-size: 13px; color: #aaa; line-height: 1.5; margin: 0; }
 
-        .test-actions { display: flex; gap: 15px; margin-top: 20px; }
+        .test-actions { display: flex; gap: 15px; margin-top: 20px; z-index: 10; position: relative; }
         
         .t-btn {
             flex: 1; padding: 12px; background: transparent; border: 1px solid white;
             color: white; border-radius: 30px; text-transform: uppercase; letter-spacing: 2px;
             font-size: 11px; cursor: pointer; transition: 0.3s; font-family: 'Montserrat', sans-serif;
+            position: relative; z-index: 20; pointer-events: auto !important;
         }
         .t-btn:active { background: white; color: black; }
     </style>
@@ -239,7 +242,7 @@
             
             document.getElementById('btn-start').innerText = dict[lang].start;
             document.getElementById('btn-test').innerText = dict[lang].test;
-            renderTestCards(); // Оновлюємо картки під нову мову
+            renderTestCards();
         }
 
         const paletteData = [
@@ -276,8 +279,8 @@
                                 <p>${data.desc}</p>
                             </div>
                             <div class="test-actions">
-                                <button class="t-btn" onclick="testSwiperInstance.slideNext()">${dict[currentLang].no}</button>
-                                <button class="t-btn" onclick="alert('Ваш вибір / Your choice: ${data.title}')">${dict[currentLang].yes}</button>
+                                <button class="t-btn swiper-no-swiping" onclick="testSwiperInstance.slideNext()">${dict[currentLang].no}</button>
+                                <button class="t-btn swiper-no-swiping" onclick="alert('Ваш вибір / Your choice: ${data.title}')">${dict[currentLang].yes}</button>
                             </div>
                         </div>
                     </div>
@@ -297,7 +300,12 @@
             showPage('test-page');
             if(!testSwiperInstance) {
                 renderTestCards();
-                testSwiperInstance = new Swiper('.test-swiper', { effect: 'cards', grabCursor: true });
+                testSwiperInstance = new Swiper('.test-swiper', { 
+                    effect: 'cards', 
+                    grabCursor: true,
+                    preventClicks: false,
+                    preventClicksPropagation: false
+                });
             }
         }
 
@@ -326,10 +334,15 @@
         let stream = null;
         async function setupCamera() {
             try {
-                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user", width: { ideal: 1920 } } });
+                // Використовуємо основну камеру (facingMode: "environment")
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: "environment", width: { ideal: 3840 } } 
+                });
                 document.getElementById('video').srcObject = stream;
             } catch (err) {
-                console.log("Камера помилка:", err);
+                console.log("Основна камера недоступна, спроба резервного запуску:", err);
+                navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+                    .then(s => document.getElementById('video').srcObject = s);
             }
         }
 
@@ -339,7 +352,7 @@
         }
 
         initPalettes();
-        renderTestCards(); // Генеруємо картки при завантаженні
+        renderTestCards();
     </script>
 </body>
 </html>
