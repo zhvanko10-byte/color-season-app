@@ -15,202 +15,112 @@
 
     <style>
         body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            background: #000;
-            overflow: hidden;
+            margin: 0; padding: 0;
+            width: 100%; height: 100%;
+            background: #000; overflow: hidden;
             font-family: 'Montserrat', sans-serif;
             color: white;
         }
 
         /* ПЕРЕМИКАЧ МОВИ */
         .lang-switch {
-            position: absolute;
-            top: 30px;
-            right: 30px;
-            z-index: 200;
-            font-size: 12px;
-            letter-spacing: 2px;
+            position: absolute; top: 30px; right: 30px;
+            z-index: 200; font-size: 12px; letter-spacing: 2px;
         }
-        .lang-btn {
-            background: none;
-            border: none;
-            color: gray;
-            cursor: pointer;
-            font-family: 'Montserrat', sans-serif;
-            transition: 0.3s;
-            padding: 0 5px;
-        }
+        .lang-btn { background: none; border: none; color: gray; cursor: pointer; padding: 0 5px; color: #555; }
         .lang-btn.active { color: white; font-weight: bold; }
 
-        /* СПІЛЬНІ СТИЛІ ЕКРАНІВ */
+        /* ЕКРАНИ */
         .page {
-            position: absolute;
-            top: 0; left: 0;
+            position: absolute; top: 0; left: 0;
             width: 100%; height: 100%;
-            display: none;
-            background: #000;
-            z-index: 100;
+            display: none; background: #000;
+            flex-direction: column; align-items: center; justify-content: center;
         }
+        .page.active { display: flex; }
 
         /* ГОЛОВНИЙ ЕКРАН */
-        #main-page {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            transition: opacity 0.5s ease;
-        }
-
         #main-page h1 {
             font-family: 'Playfair Display', serif;
-            font-size: 38px;
-            font-style: italic;
-            margin-bottom: 40px;
-            letter-spacing: 1px;
-            padding: 0 20px;
+            font-size: 38px; font-style: italic;
+            margin-bottom: 40px; letter-spacing: 1px; text-align: center;
         }
 
-        .buttons-container {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
+        .buttons-container { display: flex; flex-direction: column; gap: 20px; }
 
         .start-btn {
-            background: none;
-            color: white;
-            border: 1px solid white;
-            padding: 16px 50px;
-            border-radius: 40px;
-            font-size: 13px;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: 'Montserrat', sans-serif;
-            width: 250px;
+            background: none; color: white; border: 1px solid white;
+            padding: 16px 50px; border-radius: 40px;
+            font-size: 13px; text-transform: uppercase; letter-spacing: 3px;
+            cursor: pointer; width: 250px; font-family: 'Montserrat', sans-serif;
         }
 
-        .start-btn:active {
-            background: white;
-            color: black;
-        }
-
-        /* ЕКРАН КАМЕРИ ТА ПАЛІТР */
-        #video-container {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            z-index: 1;
-        }
+        /* КАМЕРА */
+        #video-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
         #video { width: 100%; height: 100%; object-fit: cover; }
-
         #ui-overlay {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            z-index: 2;
-            display: flex;
-            flex-direction: column;
-            pointer-events: none;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 2; display: flex; flex-direction: column; pointer-events: none;
         }
-
         #header { padding: 60px 20px; text-align: center; pointer-events: auto; }
-        
-        .back-btn {
-            position: absolute; top: 30px; left: 20px;
-            background: none; border: none; color: white;
-            font-size: 24px; cursor: pointer; pointer-events: auto;
-            z-index: 10;
-        }
-
         #palette-name {
-            font-family: 'Playfair Display', serif;
-            font-size: 50px;
-            text-transform: uppercase;
-            letter-spacing: 5px;
-            font-style: italic;
-            margin: 0;
-            color: white;
+            font-family: 'Playfair Display', serif; font-size: 50px;
+            text-transform: uppercase; letter-spacing: 5px; font-style: italic;
             text-shadow: -1.5px -1.5px 0 #000, 1.5px -1.5px 0 #000, -1.5px 1.5px 0 #000, 1.5px 1.5px 0 #000;
         }
 
-        /* ПАЛІТРИ */
-        #app-page .swiper { width: 100%; height: 100%; pointer-events: auto; }
-        #app-page .swiper-slide { display: flex; align-items: center; justify-content: center; padding-bottom: 80px; }
+        .back-btn {
+            position: absolute; top: 30px; left: 20px;
+            background: none; border: none; color: white; font-size: 24px;
+            cursor: pointer; z-index: 210; pointer-events: auto;
+        }
+
+        /* ПАЛІТРИ (SWIPER ЗАЛИШАЄМО ТІЛЬКИ ТУТ) */
+        .palette-swiper { width: 100%; height: 100%; pointer-events: auto; }
+        .swiper-slide { display: flex; align-items: center; justify-content: center; padding-bottom: 80px; }
         .color-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; width: 85%; max-width: 400px; }
-        .dot { aspect-ratio: 1 / 1; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.7); box-shadow: 0 4px 8px rgba(0,0,0,0.5); }
-        .swiper-pagination-bullet { background: #fff; opacity: 0.4; }
-        .swiper-pagination-bullet-active { opacity: 1; width: 22px; border-radius: 5px; }
-        .swiper-pagination { bottom: 40px !important; }
+        .dot { aspect-ratio: 1 / 1; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.7); }
 
-        /* ЕКРАН ТЕСТУВАННЯ */
-        #test-page { padding-top: 80px; display: none; }
-        #test-page .swiper { width: 85%; max-width: 380px; height: 75vh; }
-        
-        .test-card {
-            background: #000;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 20px;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            pointer-events: auto !important; /* Гарантуємо клікабельність */
-        }
-
-        .img-placeholder {
-            width: 100%; height: 50%;
-            background: #111;
+        /* ТЕСТ (БЕЗ SWIPER - НАДІЙНА СИСТЕМА) */
+        #test-container {
+            position: relative; width: 85%; max-width: 380px; height: 70vh;
             display: flex; align-items: center; justify-content: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            color: #555; font-size: 12px; letter-spacing: 2px; text-transform: uppercase;
         }
-
-        .test-content {
-            padding: 25px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; text-align: center;
+        .test-card {
+            position: absolute; width: 100%; height: 100%;
+            background: #000; border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px; display: none; flex-direction: column; overflow: hidden;
         }
+        .test-card.active { display: flex; }
 
-        .test-content h2 {
-            font-family: 'Playfair Display', serif;
-            font-style: italic; font-size: 24px; margin: 0 0 10px 0; letter-spacing: 1px;
-        }
-
-        .test-content p { font-size: 13px; color: #aaa; line-height: 1.5; margin: 0; }
-
-        .test-actions { display: flex; gap: 15px; margin-top: 20px; z-index: 10; position: relative; }
-        
-        .t-btn {
-            flex: 1; padding: 12px; background: transparent; border: 1px solid white;
-            color: white; border-radius: 30px; text-transform: uppercase; letter-spacing: 2px;
-            font-size: 11px; cursor: pointer; transition: 0.3s; font-family: 'Montserrat', sans-serif;
-            position: relative; z-index: 20; pointer-events: auto !important;
-        }
+        .img-placeholder { width: 100%; height: 50%; background: #111; display: flex; align-items: center; justify-content: center; color: #444; text-transform: uppercase; font-size: 10px; letter-spacing: 2px; }
+        .test-content { padding: 25px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; text-align: center; }
+        .test-content h2 { font-family: 'Playfair Display', serif; font-style: italic; font-size: 24px; margin: 0; }
+        .test-content p { font-size: 12px; color: #aaa; line-height: 1.6; margin: 10px 0; }
+        .test-actions { display: flex; gap: 10px; }
+        .t-btn { flex: 1; padding: 14px; background: none; border: 1px solid white; color: white; border-radius: 30px; text-transform: uppercase; font-size: 11px; letter-spacing: 1px; cursor: pointer; }
         .t-btn:active { background: white; color: black; }
     </style>
 </head>
 <body>
 
     <div class="lang-switch">
-        <button class="lang-btn active" onclick="setLang('uk')">UKR</button> | 
-        <button class="lang-btn" onclick="setLang('en')">ENG</button>
+        <button class="lang-btn active" id="l-uk" onclick="setLang('uk')">UKR</button> | 
+        <button class="lang-btn" id="l-en" onclick="setLang('en')">ENG</button>
     </div>
 
-    <div id="main-page" class="page" style="display: flex;">
+    <div id="main-page" class="page active">
         <h1>Yliko Color Code</h1>
         <div class="buttons-container">
-            <button class="start-btn" id="btn-start" onclick="showPage('app-page'); setupCamera();">Почати</button>
-            <button class="start-btn" id="btn-test" onclick="startTest()">Тестування</button>
+            <button class="start-btn" id="btn-start" onclick="openCamera()">Почати</button>
+            <button class="start-btn" id="btn-test" onclick="openTest()">Тестування</button>
         </div>
     </div>
 
     <div id="app-page" class="page">
+        <button class="back-btn" onclick="closeCamera()">✕</button>
         <div id="video-container"><video id="video" autoplay playsinline muted></video></div>
         <div id="ui-overlay">
-            <button class="back-btn" onclick="closeCamera()">✕</button>
             <div id="header"><h1 id="palette-name">LIGHT</h1></div>
             <div class="swiper palette-swiper">
                 <div class="swiper-wrapper" id="palette-wrapper"></div>
@@ -221,29 +131,16 @@
 
     <div id="test-page" class="page">
         <button class="back-btn" onclick="showPage('main-page')">✕</button>
-        <div class="swiper test-swiper">
-            <div class="swiper-wrapper" id="test-wrapper">
-                </div>
-        </div>
+        <div id="test-container">
+            </div>
     </div>
 
     <script>
-        // Словник перекладу
         const dict = {
-            uk: { start: "Почати", test: "Тестування", yes: "Так", no: "Ні", img: "Місце для фото" },
-            en: { start: "Start", test: "Testing", yes: "Yes", no: "No", img: "Image Placeholder" }
+            uk: { start: "Почати", test: "Тестування", yes: "Так", no: "Ні", img: "Фото колориту" },
+            en: { start: "Start", test: "Testing", yes: "Yes", no: "No", img: "Type Image" }
         };
         let currentLang = 'uk';
-
-        function setLang(lang) {
-            currentLang = lang;
-            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            document.getElementById('btn-start').innerText = dict[lang].start;
-            document.getElementById('btn-test').innerText = dict[lang].test;
-            renderTestCards();
-        }
 
         const paletteData = [
             { name: "light", colors: ["#FFFFF0","#FFFFFF","#FAEBD7","#D2B48C","#BC8F8F","#A0522D","#DEB887","#696969","#808080","#D3D3D3","#2F4F4F","#8FBC8F","#DC143C","#000080","#800080","#FFB6C1","#FF69B4","#DB7093","#FFA07A","#F0E68C","#6A5ACD","#87CEEB","#7B68EE","#4169E1","#00BFFF","#AFEEEE","#9ACD32","#008000","#3CB371","#008080"] },
@@ -254,96 +151,74 @@
             { name: "soft", colors: ["#FFFFFF","#D2B48C","#BC8F8F","#e0bf87","#6e4931","#826653","#8B4513","#707050","#999782","#3d3830","#292520","#313a66","#243042","#08535e","#451733","#e8b8a0","#c456a0","#bd4626","#82d7d9","#258f2a","#3f9170","#69c27f","#2f5c35","#153d0d","#999ee8","#5157b0","#103575","#401f6b","#5a41a6","#59190f"] }
         ];
 
-        const testCards = [
-            { id: "light", uk: { title: "Light", desc: "Світле волосся від кореня, світлі очі. Відсутність темних контрастів." }, en: { title: "Light", desc: "Light hair from the roots, light eyes. Lack of dark contrasts." } },
-            { id: "deep", uk: { title: "Deep", desc: "Темне насичене волосся та очі. Виразні риси обличчя." }, en: { title: "Deep", desc: "Dark saturated hair and eyes. Expressive facial features." } },
-            { id: "warm", uk: { title: "Warm", desc: "Волосся з рудим або медовим підтоном. Часто буває ластовиння." }, en: { title: "Warm", desc: "Hair with red or honey undertones. Freckles are common." } },
-            { id: "cool", uk: { title: "Cool", desc: "Попелясте волосся без золота, шкіра з рожевим підтоном." }, en: { title: "Cool", desc: "Ashy hair without gold, skin with a pink undertone." } },
-            { id: "clear", uk: { title: "Clear", desc: "Високий контраст (світла шкіра та темне волосся/очі)." }, en: { title: "Clear", desc: "High contrast (light skin and dark hair/eyes)." } },
-            { id: "soft", uk: { title: "Soft", desc: "М'які, приглушені відтінки зовнішності без різких переходів." }, en: { title: "Soft", desc: "Soft, muted shades of appearance without sharp transitions." } }
+        const testData = [
+            { id: "light", uk: { t: "Light", d: "Світле волосся та очі. Низький контраст." }, en: { t: "Light", d: "Light hair and eyes. Low contrast." } },
+            { id: "deep", uk: { t: "Deep", d: "Темне волосся, карі або глибокі очі." }, en: { t: "Deep", d: "Dark hair, brown or deep eyes." } },
+            { id: "warm", uk: { t: "Warm", d: "Золотистий відтінок шкіри та волосся." }, en: { t: "Warm", d: "Golden skin and hair undertones." } },
+            { id: "cool", uk: { t: "Cool", d: "Холодний підтон, відсутність золота." }, en: { t: "Cool", d: "Cool undertone, no gold/yellow." } },
+            { id: "clear", uk: { t: "Clear", d: "Яскраві очі, високий контраст зовнішності." }, en: { t: "Clear", d: "Bright eyes, high contrast appearance." } },
+            { id: "soft", uk: { t: "Soft", desc: "Приглушені кольори, очі змішаних відтінків." }, en: { t: "Soft", desc: "Muted colors, mixed eye shades." } }
         ];
 
-        let testSwiperInstance = null;
+        let currentCardIndex = 0;
 
-        function renderTestCards() {
-            const wrapper = document.getElementById('test-wrapper');
-            wrapper.innerHTML = '';
-            testCards.forEach(card => {
-                const data = card[currentLang];
-                wrapper.innerHTML += `
-                    <div class="swiper-slide test-card">
-                        <div class="img-placeholder">${dict[currentLang].img}</div>
-                        <div class="test-content">
-                            <div>
-                                <h2>${data.title}</h2>
-                                <p>${data.desc}</p>
-                            </div>
-                            <div class="test-actions">
-                                <button class="t-btn swiper-no-swiping" onclick="testSwiperInstance.slideNext()">${dict[currentLang].no}</button>
-                                <button class="t-btn swiper-no-swiping" onclick="alert('Ваш вибір / Your choice: ${data.title}')">${dict[currentLang].yes}</button>
-                            </div>
+        function showPage(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelector('.lang-switch').style.display = (id === 'main-page') ? 'block' : 'none';
+        }
+
+        function setLang(lang) {
+            currentLang = lang;
+            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('l-' + lang).classList.add('active');
+            document.getElementById('btn-start').innerText = dict[lang].start;
+            document.getElementById('btn-test').innerText = dict[lang].test;
+            if(document.getElementById('test-page').classList.contains('active')) renderCards();
+        }
+
+        function renderCards() {
+            const container = document.getElementById('test-container');
+            container.innerHTML = '';
+            testData.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = `test-card ${index === currentCardIndex ? 'active' : ''}`;
+                card.innerHTML = `
+                    <div class="img-placeholder">${dict[currentLang].img}</div>
+                    <div class="test-content">
+                        <div>
+                            <h2>${item[currentLang].t}</h2>
+                            <p>${item[currentLang].d || item[currentLang].desc}</p>
+                        </div>
+                        <div class="test-actions">
+                            <button class="t-btn" onclick="nextCard()">${dict[currentLang].no}</button>
+                            <button class="t-btn" onclick="alert('Result: ${item.id}')">${dict[currentLang].yes}</button>
                         </div>
                     </div>
                 `;
+                container.appendChild(card);
             });
-            if(testSwiperInstance) testSwiperInstance.update();
         }
 
-        function showPage(pageId) {
-            document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
-            document.getElementById(pageId).style.display = 'block';
-            if(pageId === 'main-page') document.querySelector('.lang-switch').style.display = 'block';
-            else document.querySelector('.lang-switch').style.display = 'none';
+        function nextCard() {
+            currentCardIndex++;
+            if (currentCardIndex >= testData.length) currentCardIndex = 0;
+            renderCards();
         }
 
-        function startTest() {
+        function openTest() {
+            currentCardIndex = 0;
+            renderCards();
             showPage('test-page');
-            if(!testSwiperInstance) {
-                renderTestCards();
-                testSwiperInstance = new Swiper('.test-swiper', { 
-                    effect: 'cards', 
-                    grabCursor: true,
-                    preventClicks: false,
-                    preventClicksPropagation: false
-                });
-            }
-        }
-
-        function initPalettes() {
-            const wrapper = document.getElementById('palette-wrapper');
-            paletteData.forEach(p => {
-                const slide = document.createElement('div');
-                slide.className = 'swiper-slide';
-                const grid = document.createElement('div');
-                grid.className = 'color-grid';
-                p.colors.forEach(c => {
-                    const dot = document.createElement('div');
-                    dot.className = 'dot'; dot.style.backgroundColor = c;
-                    grid.appendChild(dot);
-                });
-                slide.appendChild(grid);
-                wrapper.appendChild(slide);
-            });
-            new Swiper('.palette-swiper', {
-                loop: true,
-                pagination: { el: '.swiper-pagination', clickable: true },
-                on: { slideChange: function () { document.getElementById('palette-name').innerText = paletteData[this.realIndex].name; } }
-            });
         }
 
         let stream = null;
-        async function setupCamera() {
+        async function openCamera() {
+            showPage('app-page');
             try {
-                // Використовуємо основну камеру (facingMode: "environment")
-                stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { facingMode: "environment", width: { ideal: 3840 } } 
-                });
+                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment", width: { ideal: 1920 } } });
                 document.getElementById('video').srcObject = stream;
-            } catch (err) {
-                console.log("Основна камера недоступна, спроба резервного запуску:", err);
-                navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-                    .then(s => document.getElementById('video').srcObject = s);
-            }
+            } catch (e) { alert("Camera error"); }
         }
 
         function closeCamera() {
@@ -351,8 +226,27 @@
             showPage('main-page');
         }
 
-        initPalettes();
-        renderTestCards();
+        // ПАЛІТРИ
+        const pWrapper = document.getElementById('palette-wrapper');
+        paletteData.forEach(p => {
+            const slide = document.createElement('div');
+            slide.className = 'swiper-slide';
+            const grid = document.createElement('div');
+            grid.className = 'color-grid';
+            p.colors.forEach(c => {
+                const dot = document.createElement('div');
+                dot.className = 'dot'; dot.style.backgroundColor = c;
+                grid.appendChild(dot);
+            });
+            slide.appendChild(grid);
+            pWrapper.appendChild(slide);
+        });
+
+        new Swiper('.palette-swiper', {
+            loop: true,
+            pagination: { el: '.swiper-pagination', clickable: true },
+            on: { slideChange: function() { document.getElementById('palette-name').innerText = paletteData[this.realIndex].name; } }
+        });
     </script>
 </body>
 </html>
