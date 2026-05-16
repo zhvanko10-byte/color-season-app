@@ -7,7 +7,7 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Montserrat:wght@300;400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Montserrat:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -23,15 +23,13 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* Перемикач мови */
         .lang-switch {
             position: absolute; top: 30px; right: 30px;
             z-index: 500; font-size: 12px; letter-spacing: 2px;
         }
-        .lang-btn { background: none; border: none; color: #555; cursor: pointer; padding: 5px; font-family: 'Montserrat', sans-serif; }
+        .lang-btn { background: none; border: none; color: #555; cursor: pointer; padding: 5px; font-family: 'Montserrat', sans-serif; transition: 0.3s;}
         .lang-btn.active { color: white; font-weight: bold; }
 
-        /* Сторінки */
         .page {
             position: absolute; top: 0; left: 0;
             width: 100%; height: 100%;
@@ -44,7 +42,6 @@
         }
         .page.active { display: flex; }
 
-        /* Головна */
         #main-page h1 {
             font-family: 'Playfair Display', serif;
             font-size: 38px; font-style: italic;
@@ -56,6 +53,7 @@
             padding: 16px 50px; border-radius: 40px;
             font-size: 13px; text-transform: uppercase; letter-spacing: 3px;
             cursor: pointer; width: 260px; font-family: 'Montserrat', sans-serif;
+            transition: 0.3s;
         }
         .start-btn:active { background: white; color: black; }
 
@@ -65,7 +63,6 @@
             cursor: pointer; z-index: 1000;
         }
 
-        /* Камера */
         #video-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
         #video { width: 100%; height: 100%; object-fit: cover; }
         #ui-overlay {
@@ -82,7 +79,7 @@
         .color-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; width: 85%; max-width: 400px; margin: auto; }
         .dot { aspect-ratio: 1/1; border-radius: 50%; border: 1px solid rgba(255,255,255,0.3); }
 
-        /* Тест */
+        /* ОНОВЛЕНИЙ ДИЗАЙН КАРТОК ТЕСТУ */
         #test-container {
             position: relative; width: 85%; max-width: 380px; height: 75vh;
             display: flex; align-items: center; justify-content: center;
@@ -93,22 +90,29 @@
             border-radius: 24px; display: none; flex-direction: column; overflow: hidden;
         }
         .test-card.active { display: flex; }
+        
         .test-card img { 
             width: 100%; 
-            height: 55%; 
-            object-fit: cover; 
-            background: #222; /* фон, якщо картинка вантажиться */
+            height: 75%; /* Збільшили місце для фото */
+            object-fit: contain; /* Більше не обрізає краї! */
+            background: #f4f2ed; /* Колір фону, щоб зливався з картинкою */
+            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
         
-        .test-content { padding: 25px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; text-align: center; }
-        .test-content h2 { font-family: 'Playfair Display', serif; font-style: italic; font-size: 26px; margin: 0; }
-        .test-content p { font-size: 13px; color: #bbb; line-height: 1.5; margin: 10px 0; }
+        .test-content { 
+            padding: 20px; 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; /* Центруємо кнопки по вертикалі */
+        }
         
         .test-actions { display: flex; gap: 12px; }
         .t-btn { 
-            flex: 1; padding: 15px; background: none; border: 1px solid white; 
+            flex: 1; padding: 16px; background: none; border: 1px solid white; 
             color: white; border-radius: 30px; text-transform: uppercase; 
-            font-size: 11px; letter-spacing: 2px; cursor: pointer;
+            font-size: 12px; font-weight: 700; letter-spacing: 2px; 
+            cursor: pointer; transition: 0.3s;
         }
         .t-btn:active { background: white; color: black; }
     </style>
@@ -159,14 +163,13 @@
             { id: "soft", name: "soft", colors: ["#FFFFFF","#D2B48C","#BC8F8F","#e0bf87","#6e4931","#826653","#8B4513","#707050","#999782","#3d3830","#292520","#313a66","#243042","#08535e","#451733","#e8b8a0","#c456a0","#bd4626","#82d7d9","#258f2a","#3f9170","#69c27f","#2f5c35","#153d0d","#999ee8","#5157b0","#103575","#401f6b","#5a41a6","#59190f"] }
         ];
 
-        // ТУТ Я ЗМІНИВ .jpg НА .png
         const testData = [
-            { id: "light", img: "img/light.png", uk: { t: "Light (Світлий)", d: "Світле волосся та очі. Низький контраст." }, en: { t: "Light", d: "Light hair and eyes. Low contrast." } },
-            { id: "deep",  img: "img/deep.png",  uk: { t: "Deep (Глибокий)", d: "Темне насичене волосся та очі." }, en: { t: "Deep", d: "Dark saturated hair and eyes." } },
-            { id: "warm",  img: "img/warm.png",  uk: { t: "Warm (Теплий)", d: "Золотистий підтон волосся та шкіри." }, en: { t: "Warm", d: "Golden hair and skin undertones." } },
-            { id: "cool",  img: "img/cool.png",  uk: { t: "Cool (Холодний)", d: "Попелястий підтон, рожева шкіра." }, en: { t: "Cool", d: "Ashy undertones, pinkish skin." } },
-            { id: "clear", img: "img/clear.png", uk: { t: "Clear (Яскравий)", d: "Високий контраст і яскраві очі." }, en: { t: "Clear", d: "High contrast and bright eyes." } },
-            { id: "soft",  img: "img/soft.png",  uk: { t: "Soft (М'який)", d: "Приглушені відтінки зовнішності." }, en: { t: "Soft", d: "Muted, blended appearance." } }
+            { id: "light", img: "img/light.png" },
+            { id: "deep",  img: "img/deep.png" },
+            { id: "warm",  img: "img/warm.png" },
+            { id: "cool",  img: "img/cool.png" },
+            { id: "clear", img: "img/clear.png" },
+            { id: "soft",  img: "img/soft.png" }
         ];
 
         let currentCardIndex = 0;
@@ -193,10 +196,10 @@
             testData.forEach((card, index) => {
                 const cardDiv = document.createElement('div');
                 cardDiv.className = `test-card ${index === currentCardIndex ? 'active' : ''}`;
+                // Текст з HTML прибрано, щоб звільнити місце для вашої картинки
                 cardDiv.innerHTML = `
-                    <img src="${card.img}" alt="${card.id}">
+                    <img src="${card.img}" alt="${card.id}" onerror="this.style.display='none'">
                     <div class="test-content">
-                        <div><h2>${card[currentLang].t}</h2><p>${card[currentLang].d}</p></div>
                         <div class="test-actions">
                             <button class="t-btn" onclick="nextCard()">${dict[currentLang].no}</button>
                             <button class="t-btn" onclick="finishTest('${card.id}')">${dict[currentLang].yes}</button>
@@ -234,7 +237,7 @@
             try {
                 stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment", width: { ideal: 1920 } } });
                 document.getElementById('video').srcObject = stream;
-            } catch (e) { alert("Camera error"); }
+            } catch (e) { console.log("Камера недоступна"); }
         }
 
         function closeCamera() {
