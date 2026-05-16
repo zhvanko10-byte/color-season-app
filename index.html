@@ -23,7 +23,6 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* --- ПЕРЕМИКАЧ МОВИ --- */
         .lang-switch {
             position: absolute; top: 30px; right: 30px;
             z-index: 500; font-size: 12px; letter-spacing: 2px;
@@ -31,7 +30,6 @@
         .lang-btn { background: none; border: none; color: #555; cursor: pointer; padding: 5px; font-family: 'Montserrat', sans-serif; transition: 0.3s;}
         .lang-btn.active { color: white; font-weight: bold; }
 
-        /* --- СТОРІНКИ --- */
         .page {
             position: absolute; top: 0; left: 0;
             width: 100%; height: 100%;
@@ -44,7 +42,6 @@
         }
         .page.active { display: flex; }
 
-        /* --- ГОЛОВНА --- */
         #main-page h1 {
             font-family: 'Playfair Display', serif;
             font-size: 38px; font-style: italic;
@@ -66,7 +63,6 @@
             cursor: pointer; z-index: 1000;
         }
 
-        /* --- КАМЕРА ТА ПАЛІТРИ --- */
         #video-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
         #video { width: 100%; height: 100%; object-fit: cover; }
         #ui-overlay {
@@ -83,7 +79,7 @@
         .color-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; width: 85%; max-width: 400px; margin: auto; }
         .dot { aspect-ratio: 1/1; border-radius: 50%; border: 1px solid rgba(255,255,255,0.3); }
 
-        /* --- ТЕСТ: НОВИЙ ІДЕАЛЬНИЙ ДИЗАЙН КАРТОК --- */
+        /* ДИЗАЙН КАРТОК ТЕСТУ КОДОМ */
         #test-container {
             position: relative; width: 88%; max-width: 380px; height: 75vh;
             display: flex; align-items: center; justify-content: center;
@@ -101,9 +97,8 @@
         }
         .test-card.active { display: flex; }
 
-        /* Світлий блок (Заголовок + Фото + Текст) */
         .card-top {
-            background: #F4F0EB; /* Той самий бежевий колір */
+            background: #F4F0EB;
             color: #222;
             flex: 1;
             display: flex;
@@ -123,8 +118,8 @@
 
         .card-photo {
             width: 100%;
-            height: 40vh; /* Висота фотографії */
-            object-fit: cover; /* Чисте фото ідеально заповнить блок */
+            height: 40vh;
+            object-fit: cover;
             border-top: 1px solid rgba(0,0,0,0.05);
             border-bottom: 1px solid rgba(0,0,0,0.05);
         }
@@ -132,4 +127,78 @@
         .card-desc {
             padding: 20px 15px;
             font-family: 'Montserrat', sans-serif;
-            font-size:
+            font-size: 15px;
+            font-weight: 500;
+            line-height: 1.5;
+            text-align: center;
+        }
+
+        .test-actions { 
+            display: flex; 
+            gap: 12px; 
+            padding: 20px;
+            background: #111; 
+        }
+        .t-btn { 
+            flex: 1; padding: 16px; background: none; border: 1px solid white; 
+            color: white; border-radius: 30px; text-transform: uppercase; 
+            font-size: 12px; font-weight: 700; letter-spacing: 2px; 
+            cursor: pointer; transition: 0.3s;
+        }
+        .t-btn:active { background: white; color: black; }
+    </style>
+</head>
+<body>
+
+    <div class="lang-switch">
+        <button class="lang-btn active" id="l-uk" onclick="setLang('uk')">UKR</button> | 
+        <button class="lang-btn" id="l-en" onclick="setLang('en')">ENG</button>
+    </div>
+
+    <div id="main-page" class="page active">
+        <h1>Yliko Color Code</h1>
+        <div class="buttons-container">
+            <button class="start-btn" id="btn-start" onclick="openCamera()">Почати</button>
+            <button class="start-btn" id="btn-test" onclick="openTest()">Тестування</button>
+        </div>
+    </div>
+
+    <div id="app-page" class="page">
+        <button class="back-btn" onclick="closeCamera()">✕</button>
+        <div id="video-container"><video id="video" autoplay playsinline muted></video></div>
+        <div id="ui-overlay">
+            <div id="header"><h1 id="palette-name">LIGHT</h1></div>
+            <div class="swiper palette-swiper">
+                <div class="swiper-wrapper" id="palette-wrapper"></div>
+                <div class="swiper-pagination"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="test-page" class="page">
+        <button class="back-btn" onclick="showPage('main-page')">✕</button>
+        <div id="test-container"></div>
+    </div>
+
+    <script>
+        const dict = { uk: { start: "Почати", test: "Тестування", yes: "Так", no: "Ні" }, en: { start: "Start", test: "Testing", yes: "Yes", no: "No" } };
+        let currentLang = 'uk';
+        let paletteSwiper = null;
+
+        const paletteData = [
+            { id: "light", name: "light", colors: ["#FFFFF0","#FFFFFF","#FAEBD7","#D2B48C","#BC8F8F","#A0522D","#DEB887","#696969","#808080","#D3D3D3","#2F4F4F","#8FBC8F","#DC143C","#000080","#800080","#FFB6C1","#FF69B4","#DB7093","#FFA07A","#F0E68C","#6A5ACD","#87CEEB","#7B68EE","#4169E1","#00BFFF","#AFEEEE","#9ACD32","#008000","#3CB371","#008080"] },
+            { id: "deep", name: "deep", colors: ["#FFFFF0","#FFFFFF","#8B4513","#D2B48C","#BC8F8F","#3b1d1d","#030000","#2b2a2a","#454545","#160859","#0c300c","#0b4a0a","#0a4a41","#39522d","#380a19","#f0f26b","#bad45d","#d681d2","#e83c3c","#b82c2c","#c9240a","#3e0f59","#5d339c","#52070e","#52073c","#2f591e","#0c382d","#0d2185","#1e40e8","#0f4e6e"] },
+            { id: "warm", name: "warm", colors: ["#FFFFF0","#FFFFFF","#FAEBD7","#D2B48C","#99715d","#4a310b","#3d3830","#292520","#3d2e22","#313a66","#224a31","#38330a","#736a1d","#999782","#5a337a","#82d7d9","#f5f37f","#e6bf35","#e67b17","#f0950c","#a1d158","#f7aa83","#bd5709","#e8571e","#eb4949","#ad3311","#e31b1b","#aa1be3","#3ac2e8","#658c5d"] },
+            { id: "cool", name: "cool", colors: ["#FFFFFF","#FAEBD7","#f0f0e4","#70736f","#c0c4c4","#6d93a6","#2b0606","#152433","#000000","#03331a","#1a472c","#09544f","#571cb0","#1621c4","#c90c4b","#e69ad5","#a76cab","#de41f0","#bddecb","#158244","#0c614c","#1b8a8c","#52e1e3","#96dfeb","#0a64a8","#5c1e61","#999ee8","#5157b0","#341994","#0c1761"] },
+            { id: "clear", name: "clear", colors: ["#FFFFF0","#FFFFFF","#D2B48C","#70736f","#c0c4c4","#3b1d1d","#030000","#2b2a2a","#160859","#571cb0","#1621c4","#0d2185","#066b14","#047d34","#c41b1b","#82d7d9","#f2f072","#999ee8","#f0a35b","#c42585","#cf2b2b","#8a0f0f","#90cf3e","#14e09c","#136120","#315bc4","#0ec2e6","#38178a","#46b4eb","#0da1b8"] },
+            { id: "soft", name: "soft", colors: ["#FFFFFF","#D2B48C","#BC8F8F","#e0bf87","#6e4931","#826653","#8B4513","#707050","#999782","#3d3830","#292520","#313a66","#243042","#08535e","#451733","#e8b8a0","#c456a0","#bd4626","#82d7d9","#258f2a","#3f9170","#69c27f","#2f5c35","#153d0d","#999ee8","#5157b0","#103575","#401f6b","#5a41a6","#59190f"] }
+        ];
+
+        const testData = [
+            { id: "light", img: "img/light.png", 
+              uk: { t: "1. СВІТЛИЙ КОЛОРИТ", d: "Світле волосся від кореня.<br>Світлі брови, вії.<br>Світлі очі (блакитні, сірі, зелені).<br>Світла шкіра." }, 
+              en: { t: "1. LIGHT TYPE", d: "Light hair from roots.<br>Light eyebrows and eyelashes.<br>Light eyes (blue, grey, green).<br>Light skin." } },
+            { id: "deep",  img: "img/deep.png",  
+              uk: { t: "2. ТЕМНИЙ КОЛОРИТ", d: "Дуже темне волосся.<br>Темні очі та насичені кольори." }, 
+              en: { t: "2. DEEP TYPE", d: "Very dark hair.<br>Dark eyes and saturated colors." } },
+            { id: "warm",  img: "img/warm.
