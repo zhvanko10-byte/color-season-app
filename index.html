@@ -78,79 +78,60 @@
         .color-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; width: 85%; max-width: 400px; margin: auto; }
         .dot { aspect-ratio: 1/1; border-radius: 50%; border: 1px solid rgba(255,255,255,0.3); }
 
-        /* --- ФІКС ДЛЯ SAFARI: ТЕСТОВІ КАРТКИ --- */
         #test-container {
             position: relative; 
-            width: 88%; 
-            max-width: 380px; 
-            height: 75dvh; /* dvh замість vh для Safari */
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
+            width: 88%; max-width: 380px; 
+            height: 75dvh; 
+            display: flex; align-items: center; justify-content: center;
         }
         
         .test-card {
-            position: absolute; 
-            width: 100%; 
-            height: 100%; /* Займає 75dvh */
-            background: #111; 
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 20px; 
-            display: none; 
-            flex-direction: column; 
-            overflow: hidden;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            position: absolute; width: 100%; height: 100%;
+            background: #111; border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px; display: none; flex-direction: column; 
+            overflow: hidden; box-shadow: 0 15px 35px rgba(0,0,0,0.5);
         }
         .test-card.active { display: flex; }
 
         .card-top {
-            background: #F4F0EB;
-            color: #222;
-            flex: 1; /* Займає все місце до кнопок */
-            display: flex;
-            flex-direction: column;
-            overflow: hidden; /* Важливо для внутрішнього скролу */
+            background: #F4F0EB; color: #222;
+            flex: 1; display: flex; flex-direction: column;
+            overflow: hidden; 
         }
 
         .card-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 19px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            padding: 18px 10px;
-            margin: 0;
-            text-align: center;
-            flex-shrink: 0; /* Не стискається */
+            font-family: 'Playfair Display', serif; font-size: 19px;
+            text-transform: uppercase; letter-spacing: 1px;
+            padding: 18px 10px; margin: 0; text-align: center; flex-shrink: 0;
         }
 
+        .test-swiper { width: 100%; flex: 1; display: flex; flex-direction: column; }
+        
         .card-photo {
-            width: 100%;
-            height: 40dvh; /* Зафіксували висоту фото */
-            object-fit: cover;
+            width: 100%; height: 40dvh; object-fit: cover;
             border-top: 1px solid rgba(0,0,0,0.05);
             border-bottom: 1px solid rgba(0,0,0,0.05);
-            flex-shrink: 0; /* Не стискається */
+            flex-shrink: 0;
         }
 
-        /* --- ФІКС ТЕКСТУ ДЛЯ SAFARI --- */
         .card-desc {
-            padding: 20px 15px;
-            font-family: 'Montserrat', sans-serif;
-            font-size: 14px;
-            font-weight: 500;
-            line-height: 1.6;
-            text-align: center;
-            overflow-y: auto; /* ЯКЩО ТЕКСТУ БАГАТО, ВІН СКРОЛИТЬСЯ ВСЕРЕДИНІ */
-            flex: 1; /* Займає вільне місце */
-            -webkit-overflow-scrolling: touch; /* Плавний скролл у Safari */
+            padding: 20px 15px; font-family: 'Montserrat', sans-serif;
+            font-size: 14px; font-weight: 500; line-height: 1.6; text-align: center;
+            overflow-y: auto; flex: 1; -webkit-overflow-scrolling: touch;
         }
+
+        .swipe-hint {
+            text-align: center; font-size: 10px; color: #888; 
+            text-transform: uppercase; letter-spacing: 1px;
+            padding-bottom: 15px; flex-shrink: 0;
+        }
+        
+        .test-swiper .swiper-pagination-bullet { background: #999; }
+        .test-swiper .swiper-pagination-bullet-active { background: #222; }
+        .test-swiper .swiper-pagination { position: relative; bottom: 0; margin-top: -10px; padding-bottom: 15px;}
 
         .test-actions { 
-            display: flex; 
-            gap: 12px; 
-            padding: 20px;
-            background: #111; 
-            flex-shrink: 0; /* ЗАВЖДИ ЗАЛИШАЄТЬСЯ НА ЕКРАНІ */
+            display: flex; gap: 12px; padding: 20px; background: #111; flex-shrink: 0; 
         }
         .t-btn { 
             flex: 1; padding: 16px; background: none; border: 1px solid white; 
@@ -198,9 +179,13 @@
 
     <script>
         try {
-            const dict = { uk: { start: "Почати", test: "Тестування", yes: "Так", no: "Ні" }, en: { start: "Start", test: "Testing", yes: "Yes", no: "No" } };
+            const dict = { 
+                uk: { start: "Почати", test: "Тестування", yes: "Так", no: "Ні", swipe: "← гортайте фото →" }, 
+                en: { start: "Start", test: "Testing", yes: "Yes", no: "No", swipe: "← swipe photos →" } 
+            };
             let currentLang = 'uk';
             let paletteSwiper = null;
+            let cardSwipers = [];
 
             const paletteData = [
                 { id: "light", name: "light", colors: ["#FFFFF0","#FFFFFF","#FAEBD7","#D2B48C","#BC8F8F","#A0522D","#DEB887","#696969","#808080","#D3D3D3","#2F4F4F","#8FBC8F","#DC143C","#000080","#800080","#FFB6C1","#FF69B4","#DB7093","#FFA07A","#F0E68C","#6A5ACD","#87CEEB","#7B68EE","#4169E1","#00BFFF","#AFEEEE","#9ACD32","#008000","#3CB371","#008080"] },
@@ -212,24 +197,49 @@
             ];
 
             const testData = [
-                { id: "light", img: "img/light.png", 
-                  uk: { t: "1. СВІТЛИЙ КОЛОРИТ", d: "Світле волосся від кореня.<br>Світлі брови, вії.<br>Світлі очі (блакитні, сірі, зелені).<br>Світла шкіра." }, 
-                  en: { t: "1. LIGHT TYPE", d: "Light hair from roots.<br>Light eyebrows and eyelashes.<br>Light eyes (blue, grey, green).<br>Light skin." } },
-                { id: "deep",  img: "img/deep.png",  
-                  uk: { t: "2. ТЕМНИЙ КОЛОРИТ", d: "Дуже темне волосся.<br>Темні очі та насичені кольори." }, 
-                  en: { t: "2. DEEP TYPE", d: "Very dark hair.<br>Dark eyes and saturated colors." } },
-                { id: "warm",  img: "img/warm.png",  
-                  uk: { t: "3. ТЕПЛИЙ КОЛОРИТ", d: "Золотистий або рудий підтон<br>волосся та шкіри." }, 
-                  en: { t: "3. WARM TYPE", d: "Golden or reddish undertone<br>of hair and skin." } },
-                { id: "cool",  img: "img/cool.png",  
-                  uk: { t: "4. ХОЛОДНИЙ КОЛОРИТ", d: "Попелястий підтон,<br>шкіра з рожевим відтінком." }, 
-                  en: { t: "4. COOL TYPE", d: "Ashy undertone,<br>skin with a pinkish tint." } },
-                { id: "clear", img: "img/clear.png", 
-                  uk: { t: "5. КОНТРАСТНИЙ КОЛОРИТ", d: "Високий контраст між<br>очима, волоссям та шкірою." }, 
-                  en: { t: "5. CLEAR TYPE", d: "High contrast between<br>eyes, hair, and skin." } },
-                { id: "soft",  img: "img/soft.png",  
-                  uk: { t: "6. М'ЯКИЙ КОЛОРИТ", d: "Приглушені, складні відтінки<br>без різких ліній." }, 
-                  en: { t: "6. SOFT TYPE", d: "Muted, complex shades<br>without sharp lines." } }
+                { 
+                    id: "light", uk_t: "1. СВІТЛИЙ КОЛОРИТ", en_t: "1. LIGHT TYPE",
+                    slides: [
+                        { img: "img/light.png", uk: "Світле волосся від кореня.<br>Світлі брови, вії.<br>Світлі очі (блакитні, сірі, зелені).<br>Світла шкіра.", en: "Light hair from roots.<br>Light eyebrows and eyelashes.<br>Light eyes (blue, grey, green).<br>Light skin." }
+                    ]
+                },
+                { 
+                    id: "deep", uk_t: "2. ТЕМНИЙ КОЛОРИТ", en_t: "2. DEEP TYPE",
+                    slides: [
+                        { img: "img/deep.png", uk: "Дуже темне волосся.<br>Темні очі та насичені кольори.", en: "Very dark hair.<br>Dark eyes and saturated colors." }
+                    ]
+                },
+                { 
+                    id: "warm", uk_t: "3. ТЕПЛИЙ КОЛОРИТ", en_t: "3. WARM TYPE",
+                    slides: [
+                        { img: "img/warm.png", uk: "Золотистий або рудий підтон<br>волосся та шкіри.", en: "Golden or reddish undertone<br>of hair and skin." }
+                    ]
+                },
+                { 
+                    id: "cool", uk_t: "4. ХОЛОДНИЙ КОЛОРИТ", en_t: "4. COOL TYPE",
+                    slides: [
+                        { img: "img/cool.png", uk: "Попелястий підтон,<br>шкіра з рожевим відтінком.", en: "Ashy undertone,<br>skin with a pinkish tint." }
+                    ]
+                },
+                { 
+                    id: "clear", uk_t: "5. КОНТРАСТНИЙ КОЛОРИТ", en_t: "5. CLEAR TYPE",
+                    slides: [
+                        { img: "img/clear_1.png", uk: "Світле волосся + темні очі", en: "Light hair + dark eyes" },
+                        { img: "img/clear_2.png", uk: "Темне волосся + світлі очі", en: "Dark hair + light eyes" },
+                        { img: "img/clear_3.png", uk: "Чорне волосся + дуже світла шкіра", en: "Black hair + very light skin" }
+                    ]
+                },
+                { 
+                    // ОСЬ ТУТ 6-ТА КАРТКА І 5 ФОТОГРАФІЙ ДЛЯ НЕЇ
+                    id: "soft", uk_t: "6. М'ЯКИЙ КОЛОРИТ", en_t: "6. SOFT TYPE",
+                    slides: [
+                        { img: "img/soft_1.png", uk: "Приглушені відтінки<br>без різких контрастів", en: "Muted shades<br>without sharp contrasts" },
+                        { img: "img/soft_2.png", uk: "Складні змішані кольори очей<br>(сіро-зелені, сіро-блакитні)", en: "Complex mixed eye colors<br>(gray-green, gray-blue)" },
+                        { img: "img/soft_3.png", uk: "М'який перехід між<br>кольором волосся та шкіри", en: "Soft transition between<br>hair and skin color" },
+                        { img: "img/soft_4.png", uk: "Попелястий або мишачий<br>відтінок волосся", en: "Ashy or mousey<br>hair shade" },
+                        { img: "img/soft_5.png", uk: "Низький контраст зовнішності", en: "Low contrast appearance" }
+                    ]
+                }
             ];
 
             let currentCardIndex = 0;
@@ -251,17 +261,40 @@
             };
 
             window.renderTestCards = function() {
+                if(cardSwipers.length > 0) {
+                    cardSwipers.forEach(s => s.destroy(true, true));
+                    cardSwipers = [];
+                }
+
                 const container = document.getElementById('test-container');
                 if(!container) return;
                 container.innerHTML = '';
+                
                 testData.forEach((card, index) => {
+                    let slidesHtml = '';
+                    card.slides.forEach(slide => {
+                        slidesHtml += `
+                            <div class="swiper-slide" style="display: flex; flex-direction: column;">
+                                <img src="${slide.img}" class="card-photo" alt="Photo" onerror="this.src='https://via.placeholder.com/400x500/F4F0EB/222222?text=Photo'">
+                                <div class="card-desc">${slide[currentLang]}</div>
+                            </div>
+                        `;
+                    });
+
+                    const needsSwipe = card.slides.length > 1;
+                    const hintHtml = needsSwipe ? `<div class="swiper-pagination"></div><div class="swipe-hint">${dict[currentLang].swipe}</div>` : '';
+
                     const cardDiv = document.createElement('div');
                     cardDiv.className = `test-card ${index === currentCardIndex ? 'active' : ''}`;
                     cardDiv.innerHTML = `
                         <div class="card-top">
-                            <h2 class="card-title">${card[currentLang].t}</h2>
-                            <img src="${card.img}" class="card-photo" alt="${card.id}" onerror="this.src='https://via.placeholder.com/400x500/F4F0EB/222222?text=Photo'">
-                            <div class="card-desc">${card[currentLang].d}</div>
+                            <h2 class="card-title">${card[`${currentLang}_t`]}</h2>
+                            <div class="swiper test-swiper">
+                                <div class="swiper-wrapper">
+                                    ${slidesHtml}
+                                </div>
+                                ${hintHtml}
+                            </div>
                         </div>
                         <div class="test-actions">
                             <button class="t-btn" onclick="window.nextCard()">${dict[currentLang].no}</button>
@@ -270,6 +303,14 @@
                     `;
                     container.appendChild(cardDiv);
                 });
+
+                if (typeof Swiper !== 'undefined') {
+                    cardSwipers = new Swiper('.test-swiper', {
+                        pagination: { el: '.swiper-pagination', clickable: true },
+                        observer: true,
+                        observeParents: true
+                    });
+                }
             };
 
             window.nextCard = function() {
