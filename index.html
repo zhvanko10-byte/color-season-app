@@ -116,7 +116,7 @@
 
         .card-desc {
             padding: 20px 15px; font-family: 'Montserrat', sans-serif;
-            font-size: 14px; font-weight: 500; line-height: 1.6; text-align: center;
+            font-size: 13px; font-weight: 500; line-height: 1.6; text-align: left;
             overflow-y: auto; flex: 1; -webkit-overflow-scrolling: touch;
         }
 
@@ -196,47 +196,50 @@
                 { id: "soft", name: "soft", colors: ["#FFFFFF","#D2B48C","#BC8F8F","#e0bf87","#6e4931","#826653","#8B4513","#707050","#999782","#3d3830","#292520","#313a66","#243042","#08535e","#451733","#e8b8a0","#c456a0","#bd4626","#82d7d9","#258f2a","#3f9170","#69c27f","#2f5c35","#153d0d","#999ee8","#5157b0","#103575","#401f6b","#5a41a6","#59190f"] }
             ];
 
+            const softDescriptionUK = "• середні тони у всьому: волосся, очі, шкіра<br>• немає різких контрастів<br>• у чорно-білому фото обличчя виглядає м’яким і гармонійним<br>• найпоширеніший тип серед українок";
+            const softDescriptionEN = "• medium tones in everything: hair, eyes, skin<br>• no sharp contrasts<br>• in a black-and-white photo, the face looks soft and harmonious<br>• the most common type among Ukrainian women";
+
             const testData = [
                 { 
                     id: "light", uk_t: "1. СВІТЛИЙ КОЛОРИТ", en_t: "1. LIGHT TYPE",
                     slides: [
-                        { img: "img/light.jpg", uk: "Світле волосся від кореня.<br>Світлі брови, вії.<br>Світлі очі (блакитні, сірі, зелені).<br>Світла шкіра.", en: "Light hair from roots.<br>Light eyebrows and eyelashes.<br>Light eyes (blue, grey, green).<br>Light skin." }
+                        { img: "img/light.jpg", uk: "<div style='text-align:center'>Світле волосся від кореня.<br>Світлі брови, вії.<br>Світлі очі (блакитні, сірі, зелені).<br>Світла шкіра.</div>", en: "<div style='text-align:center'>Light hair from roots.<br>Light eyebrows and eyelashes.<br>Light eyes (blue, grey, green).<br>Light skin.</div>" }
                     ]
                 },
                 { 
                     id: "deep", uk_t: "2. ТЕМНИЙ КОЛОРИТ", en_t: "2. DEEP TYPE",
                     slides: [
-                        { img: "img/deep.jpg", uk: "Дуже темне волосся.<br>Темні очі та насичені кольори.", en: "Very dark hair.<br>Dark eyes and saturated colors." }
+                        { img: "img/deep.jpg", uk: "<div style='text-align:center'>Дуже темне волосся.<br>Темні очі та насичені кольори.</div>", en: "<div style='text-align:center'>Very dark hair.<br>Dark eyes and saturated colors.</div>" }
                     ]
                 },
                 { 
                     id: "warm", uk_t: "3. ТЕПЛИЙ КОЛОРИТ", en_t: "3. WARM TYPE",
                     slides: [
-                        { img: "img/warm.jpg", uk: "Золотистий або рудий підтон<br>волосся та шкіри.", en: "Golden or reddish undertone<br>of hair and skin." }
+                        { img: "img/warm.jpg", uk: "<div style='text-align:center'>Золотистий або рудий підтон<br>волосся та шкіри.</div>", en: "<div style='text-align:center'>Golden or reddish undertone<br>of hair and skin.</div>" }
                     ]
                 },
                 { 
                     id: "cool", uk_t: "4. ХОЛОДНИЙ КОЛОРИТ", en_t: "4. COOL TYPE",
                     slides: [
-                        { img: "img/cool.jpg", uk: "Попелястий підтон,<br>шкіра з рожевим відтінком.", en: "Ashy undertone,<br>skin with a pinkish tint." }
+                        { img: "img/cool.jpg", uk: "<div style='text-align:center'>Попелястий підтон,<br>шкіра з рожевим відтінком.</div>", en: "<div style='text-align:center'>Ashy undertone,<br>skin with a pinkish tint.</div>" }
                     ]
                 },
                 { 
                     id: "clear", uk_t: "5. КОНТРАСТНИЙ КОЛОРИТ", en_t: "5. CLEAR TYPE",
                     slides: [
-                        { img: "img/clear_1.jpg", uk: "Світле волосся + темні очі", en: "Light hair + dark eyes" },
-                        { img: "img/clear_2.jpg", uk: "Темне волосся + світлі очі", en: "Dark hair + light eyes" },
-                        { img: "img/clear_3.jpg", uk: "Чорне волосся + дуже світла шкіра", en: "Black hair + very light skin" }
+                        { img: "img/clear_1.jpg", uk: "<div style='text-align:center'>Світле волосся + темні очі</div>", en: "<div style='text-align:center'>Light hair + dark eyes</div>" },
+                        { img: "img/clear_2.jpg", uk: "<div style='text-align:center'>Темне волосся + світлі очі</div>", en: "<div style='text-align:center'>Dark hair + light eyes</div>" },
+                        { img: "img/clear_3.jpg", uk: "<div style='text-align:center'>Чорне волосся + дуже світла шкіра</div>", en: "<div style='text-align:center'>Black hair + very light skin</div>" }
                     ]
                 },
                 { 
                     id: "soft", uk_t: "6. М'ЯКИЙ КОЛОРИТ", en_t: "6. SOFT TYPE",
                     slides: [
-                        { img: "img/soft_1.jpg", uk: "Приглушені відтінки<br>без різких контрастів", en: "Muted shades<br>without sharp contrasts" },
-                        { img: "img/soft_2.jpg", uk: "Складні змішані кольори очей<br>(сіро-зелені, сіро-блакитні)", en: "Complex mixed eye colors<br>(gray-green, gray-blue)" },
-                        { img: "img/soft_3.jpg", uk: "М'який перехід між<br>кольором волосся та шкіри", en: "Soft transition between<br>hair and skin color" },
-                        { img: "img/soft_4.jpg", uk: "Попелястий або мишачий<br>відтінок волосся", en: "Ashy or mousey<br>hair shade" },
-                        { img: "img/soft_5.jpg", uk: "Низький контраст зовнішності", en: "Low contrast appearance" }
+                        { img: "img/soft_1.jpg", uk: softDescriptionUK, en: softDescriptionEN },
+                        { img: "img/soft_2.jpg", uk: softDescriptionUK, en: softDescriptionEN },
+                        { img: "img/soft_3.jpg", uk: softDescriptionUK, en: softDescriptionEN },
+                        { img: "img/soft_4.jpg", uk: softDescriptionUK, en: softDescriptionEN },
+                        { img: "img/soft_5.jpg", uk: softDescriptionUK, en: softDescriptionEN }
                     ]
                 }
             ];
