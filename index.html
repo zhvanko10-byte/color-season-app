@@ -116,7 +116,7 @@
 
         .card-desc {
             padding: 20px 15px; font-family: 'Montserrat', sans-serif;
-            font-size: 13px; font-weight: 500; line-height: 1.6; text-align: left;
+            font-size: 14px; font-weight: 500; line-height: 1.6; text-align: center;
             overflow-y: auto; flex: 1; -webkit-overflow-scrolling: touch;
         }
 
@@ -196,8 +196,9 @@
                 { id: "soft", name: "soft", colors: ["#FFFFFF","#D2B48C","#BC8F8F","#e0bf87","#6e4931","#826653","#8B4513","#707050","#999782","#3d3830","#292520","#313a66","#243042","#08535e","#451733","#e8b8a0","#c456a0","#bd4626","#82d7d9","#258f2a","#3f9170","#69c27f","#2f5c35","#153d0d","#999ee8","#5157b0","#103575","#401f6b","#5a41a6","#59190f"] }
             ];
 
-            const softDescriptionUK = "• середні тони у всьому: волосся, очі, шкіра<br>• немає різких контрастів<br>• у чорно-білому фото обличчя виглядає м’яким і гармонійним<br>• найпоширеніший тип серед українок";
-            const softDescriptionEN = "• medium tones in everything: hair, eyes, skin<br>• no sharp contrasts<br>• in a black-and-white photo, the face looks soft and harmonious<br>• the most common type among Ukrainian women";
+            // Новий опис для 6-ї картки
+            const softDescriptionUK = "<div style='text-align:center'>середні тони у всьому: волосся, очі, шкіра<br><br>немає різких контрастів.</div>";
+            const softDescriptionEN = "<div style='text-align:center'>medium tones in everything: hair, eyes, skin<br><br>no sharp contrasts.</div>";
 
             const testData = [
                 { 
@@ -283,6 +284,7 @@
                         `;
                     });
 
+                    // Цей рядок автоматично додає напис "← гортайте фото →", якщо фотографій більше однієї (як у картці 5 і 6)
                     const needsSwipe = card.slides.length > 1;
                     const hintHtml = needsSwipe ? `<div class="swiper-pagination"></div><div class="swipe-hint">${dict[currentLang].swipe}</div>` : '';
 
