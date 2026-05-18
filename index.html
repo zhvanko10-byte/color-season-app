@@ -11,18 +11,18 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 
     <style>
-        /* --- ІДЕАЛЬНА СИНХРОНІЗАЦІЯ КОЛЬОРІВ --- */
+        /* --- ІДЕАЛЬНА СИНХРОНІЗАЦІЯ КОЛЬОРІВ ДЛЯ ВСІХ ТЕМ --- */
         :root {
-            /* 1. Dark Theme (Класична) */
+            /* 1. Dark Theme (Справжня чорна тема) */
             --bg-main: #000000;
             --text-main: #ffffff;
             --border-main: #ffffff;
             
-            --card-outer-bg: #111111;
+            --card-outer-bg: #111111; /* Темно-сіра картка */
             --card-outer-border: rgba(255, 255, 255, 0.2);
-            --card-top-bg: #F4F0EB;     /* Бежевий верх */
-            --card-top-text: #222222;   /* Темний текст на бежевому */
-            --card-bottom-bg: #111111;  /* Чорний низ */
+            --card-top-bg: transparent; /* Прозорий, щоб було видно колір картки */
+            --card-top-text: #ffffff;   /* Білий текст */
+            --card-bottom-bg: transparent; /* Прозорий низ */
             
             --btn-active-bg: #ffffff;
             --btn-active-text: #000000;
@@ -209,7 +209,7 @@
             transition: background 0.5s ease;
         }
         .t-btn { 
-            flex: 1; padding: 16px; background: transparent; border: 1px solid var(--text-main); 
+            flex: 1; padding: 16px; background: transparent; border: 1px solid var(--border-main); 
             color: var(--text-main); border-radius: 30px; text-transform: uppercase; 
             font-size: 12px; font-weight: 700; letter-spacing: 2px; 
             cursor: pointer; transition: 0.3s;
