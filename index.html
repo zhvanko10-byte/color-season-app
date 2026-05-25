@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yliko Color Code - Photo Capture</title>
+    <title>Yliko Color Code - Dual Camera</title>
     <script src="https://cdn.jsdelivr.net/npm/heic2any/dist/heic2any.min.js"></script>
     <style>
         body { 
@@ -45,19 +45,23 @@
             position: absolute;
             bottom: 30px;
             display: flex;
-            gap: 15px;
+            flex-wrap: wrap; /* Позволяет кнопкам переноситься на маленьких экранах */
+            justify-content: center;
+            gap: 10px;
             z-index: 100;
-            /* Скрыта до загрузки ИИ */
             display: none; 
+            width: 100%;
+            padding: 0 10px;
+            box-sizing: border-box;
         }
 
         .btn {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
             color: white;
-            padding: 15px 25px;
-            border-radius: 25px;
-            font-size: 16px;
+            padding: 12px 18px;
+            border-radius: 20px;
+            font-size: 14px;
             font-weight: bold;
             cursor: pointer;
             border: 1px solid rgba(255, 255, 255, 0.3);
@@ -70,7 +74,6 @@
             background: rgba(255, 255, 255, 0.3);
         }
 
-        /* Кнопка "Сделать фото" делаем акцентной */
         .btn-capture {
             background: #007AFF;
             border-color: #007AFF;
@@ -97,6 +100,8 @@
         <input type="file" id="imageUpload" accept="image/*, .heic, .heif">
     </label>
     
+    <button class="btn" id="switchCameraBtn">🔄 Смена камеры</button>
+    
     <button class="btn btn-capture" id="captureBtn">📸 Сделать фото</button>
 </div>
 
@@ -110,10 +115,16 @@
     const controls = document.getElementById('controls');
     const uploadLabel = document.getElementById('uploadLabel');
     const captureBtn = document.getElementById('captureBtn');
+    const switchCameraBtn = document.getElementById('switchCameraBtn');
     const statusText = document.getElementById('status');
     
     let processedCanvas = null; 
     let segmenter = null;
+
+    // Переменные для управления камерой
+    let currentStream = null;
+    let currentFacingMode = "user"; // Начинаем с селфи-камеры
+    let isDrawingLoopRunning = false;
 
     // --- 1. ЗАГРУЗКА ИИ ---
     async function initAI() {
@@ -133,7 +144,6 @@
             
             statusText.style.color = 'white';
             statusText.innerText = "ИИ готов!";
-            // Показываем кнопки
             controls.style.display = "flex";
             setTimeout(() => statusText.style.display = 'none', 3000);
         } catch (error) {
@@ -163,7 +173,7 @@
             let clothesFound = false;
 
             for (let i = 0; i < maskArray.length; i++) {
-                if (maskArray[i] === 4) { // 4 - код одежды
+                if (maskArray[i] === 4) { 
                     clothesFound = true;
                     maskImageData.data[i * 4 + 0] = 0; 
                     maskImageData.data[i * 4 + 1] = 0; 
@@ -210,33 +220,39 @@
         }
     }
 
-    // --- 3. ОБРАБОТКА "СДЕЛАТЬ ФОТО" (Новая логика) ---
+    // --- 3. ОБРАБОТКА "СДЕЛАТЬ ФОТО" ---
     captureBtn.addEventListener('click', async () => {
         captureBtn.classList.add('loading');
         captureBtn.innerText = 'Снимок...';
 
-        // Создаем временный холст строго под формат нашего экрана (1080x1920)
         const snapCanvas = document.createElement('canvas');
         snapCanvas.width = 1080;
         snapCanvas.height = 1920;
         const sCtx = snapCanvas.getContext('2d');
 
-        // Используем математику кропа, чтобы сфоткать ровно то, что видит человек
         const scale = Math.max(snapCanvas.width / video.videoWidth, snapCanvas.height / video.videoHeight);
         const camX = (snapCanvas.width / 2) - (video.videoWidth / 2) * scale;
         const camY = (snapCanvas.height / 2) - (video.videoHeight / 2) * scale;
+        const camW = video.videoWidth * scale;
+        const camH = video.videoHeight * scale;
 
-        // Рисуем текущий кадр видео на холст
-        sCtx.drawImage(video, camX, camY, video.videoWidth * scale, video.videoHeight * scale);
+        // Если это селфи, фото тоже нужно отзеркалить при сохранении
+        if (currentFacingMode === "user") {
+            sCtx.save();
+            sCtx.translate(snapCanvas.width, 0);
+            sCtx.scale(-1, 1);
+            sCtx.drawImage(video, camX, camY, camW, camH);
+            sCtx.restore();
+        } else {
+            sCtx.drawImage(video, camX, camY, camW, camH);
+        }
 
-        // Превращаем холст в картинку и отправляем в нейросеть
         const snapshot = new Image();
         snapshot.onload = async function() {
             await processImageToMask(snapshot);
             captureBtn.classList.remove('loading');
             captureBtn.innerText = '📸 Сделать фото';
         };
-        // Конвертируем в JPEG с качеством 90%
         snapshot.src = snapCanvas.toDataURL('image/jpeg', 0.9);
     });
 
@@ -271,21 +287,37 @@
         img.src = URL.createObjectURL(file);
     });
 
-    // --- 5. КАМЕРА ---
+    // --- 5. УПРАВЛЕНИЕ КАМЕРОЙ (Смена и инициализация) ---
     async function initCamera() {
+        // Если камера уже работает, выключаем её перед запуском новой
+        if (currentStream) {
+            currentStream.getTracks().forEach(track => track.stop());
+        }
+
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: "environment" } 
+            currentStream = await navigator.mediaDevices.getUserMedia({ 
+                video: { facingMode: currentFacingMode } 
             });
-            video.srcObject = stream;
+            video.srcObject = currentStream;
+            
             video.onloadedmetadata = () => {
                 video.play();
-                requestAnimationFrame(drawLoop);
+                // Запускаем цикл отрисовки только один раз
+                if (!isDrawingLoopRunning) {
+                    isDrawingLoopRunning = true;
+                    requestAnimationFrame(drawLoop);
+                }
             };
         } catch (err) {
             console.error("Ошибка камеры: ", err);
         }
     }
+
+    switchCameraBtn.addEventListener('click', () => {
+        // Меняем режим на противоположный
+        currentFacingMode = currentFacingMode === "user" ? "environment" : "user";
+        initCamera();
+    });
 
     // --- 6. ЦИКЛ ОТРИСОВКИ ---
     function drawLoop() {
@@ -294,7 +326,20 @@
         const camScale = Math.max(canvas.width / video.videoWidth, canvas.height / video.videoHeight);
         const camX = (canvas.width / 2) - (video.videoWidth / 2) * camScale;
         const camY = (canvas.height / 2) - (video.videoHeight / 2) * camScale;
-        ctx.drawImage(video, camX, camY, video.videoWidth * camScale, video.videoHeight * camScale);
+        const camW = video.videoWidth * camScale;
+        const camH = video.videoHeight * camScale;
+
+        // ЭФФЕКТ ЗЕРКАЛА ДЛЯ СЕЛФИ КАМЕРЫ
+        if (currentFacingMode === "user") {
+            ctx.save();
+            ctx.translate(canvas.width, 0); // Сдвигаем координаты вправо
+            ctx.scale(-1, 1); // Отражаем по оси X
+            ctx.drawImage(video, camX, camY, camW, camH);
+            ctx.restore();
+        } else {
+            // Обычная отрисовка для задней камеры
+            ctx.drawImage(video, camX, camY, camW, camH);
+        }
 
         if (processedCanvas) {
             const scale = Math.max(canvas.width / processedCanvas.width, canvas.height / processedCanvas.height);
