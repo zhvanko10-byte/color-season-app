@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yliko Color Code - Layer Test</title>
+    <title>Yliko Color Code - Universal Upload</title>
+    <script src="https://cdn.jsdelivr.net/npm/heic2any/dist/heic2any.min.js"></script>
     <style>
         body { 
             display: flex; 
@@ -26,7 +27,6 @@
         }
         video { display: none; }
         
-        /* Стили для красивой кнопки загрузки */
         .upload-btn {
             background: #007AFF;
             color: white;
@@ -36,15 +36,22 @@
             font-weight: bold;
             cursor: pointer;
             border: none;
+            transition: background 0.3s;
+            text-align: center;
+            min-width: 200px;
+        }
+        .upload-btn.loading {
+            background: #f39c12; /* Цвет ожидания */
+            pointer-events: none;
         }
         input[type="file"] { display: none; }
     </style>
 </head>
 <body>
 
-<label class="upload-btn">
+<label class="upload-btn" id="uploadLabel">
     Загрузить фото
-    <input type="file" id="imageUpload" accept="image/*">
+    <input type="file" id="imageUpload" accept="image/*, .heic, .heif">
 </label>
 
 <video id="videoElement" autoplay playsinline></video>
@@ -54,22 +61,59 @@
     const video = document.getElementById('videoElement');
     const canvas = document.getElementById('mainCanvas');
     const ctx = canvas.getContext('2d');
+    const uploadLabel = document.getElementById('uploadLabel');
     
-    let userPhoto = null; // Здесь будем хранить загруженное фото
+    let userPhoto = null;
 
-    // --- 1. ОБРАБОТКА ЗАГРУЗКИ ФОТО ---
-    document.getElementById('imageUpload').addEventListener('change', function(e) {
-        const file = e.target.files[0];
+    // --- ОБРАБОТКА ЗАГРУЗКИ И КОНВЕРТАЦИИ ФОТО ---
+    document.getElementById('imageUpload').addEventListener('change', async function(e) {
+        let file = e.target.files[0];
         if (!file) return;
-        
+
+        // Проверяем, это ли формат HEIC/HEIF (Apple)
+        const isHeic = file.name.toLowerCase().endsWith('.heic') || file.name.toLowerCase().endsWith('.heif');
+
+        if (isHeic) {
+            // Меняем кнопку, чтобы пользователь понимал, что идет обработка
+            uploadLabel.innerHTML = 'Обработка (HEIC)...';
+            uploadLabel.classList.add('loading');
+            
+            try {
+                // Конвертируем HEIC в обычный JPEG
+                const convertedBlob = await heic2any({
+                    blob: file,
+                    toType: "image/jpeg",
+                    quality: 0.8
+                });
+                
+                // heic2any иногда возвращает массив, если внутри несколько кадров
+                file = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
+            } catch (error) {
+                console.error("Ошибка конвертации HEIC:", error);
+                alert("Не удалось прочитать фото с iPhone. Попробуйте другой файл.");
+                uploadLabel.innerHTML = 'Загрузить фото';
+                uploadLabel.classList.remove('loading');
+                return;
+            }
+        }
+
+        // Загружаем готовый файл на холст
         const img = new Image();
         img.onload = function() {
-            userPhoto = img; // Сохраняем фото, когда оно загрузилось
+            userPhoto = img;
+            // Возвращаем кнопку в исходное состояние
+            uploadLabel.innerHTML = 'Загрузить другое фото';
+            uploadLabel.classList.remove('loading');
+        }
+        img.onerror = function() {
+            alert("Браузер не смог прочитать этот формат. Попробуйте другой.");
+            uploadLabel.innerHTML = 'Загрузить фото';
+            uploadLabel.classList.remove('loading');
         }
         img.src = URL.createObjectURL(file);
     });
 
-    // --- 2. ЗАПУСК КАМЕРЫ ---
+    // --- ЗАПУСК КАМЕРЫ ---
     async function initCamera() {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ 
@@ -86,39 +130,35 @@
         }
     }
 
-    // --- 3. ГЛАВНЫЙ ЦИКЛ ОТРИСОВКИ СЛОЕВ ---
+    // --- ГЛАВНЫЙ ЦИКЛ ОТРИСОВКИ ---
     function drawLoop() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Если пользователь загрузил фото, строим "бутерброд"
+        // 1. Рисуем фото, если оно есть
         if (userPhoto) {
-            // СЛОЙ 1: Рисуем фото пользователя
             const imgScale = Math.max(canvas.width / userPhoto.width, canvas.height / userPhoto.height);
             const imgX = (canvas.width / 2) - (userPhoto.width / 2) * imgScale;
             const imgY = (canvas.height / 2) - (userPhoto.height / 2) * imgScale;
             ctx.drawImage(userPhoto, imgX, imgY, userPhoto.width * imgScale, userPhoto.height * imgScale);
-
-            // СЛОЙ 2: Вырезаем "дырку" (имитация вырезанной одежды)
-            ctx.globalCompositeOperation = 'destination-out';
-            ctx.beginPath();
-            // Рисуем круг по центру размером 400px
-            ctx.arc(canvas.width / 2, canvas.height / 2, 400, 0, Math.PI * 2);
-            ctx.fill();
-
-            // СЛОЙ 3: Готовимся рисовать камеру ПОД фотографией
-            ctx.globalCompositeOperation = 'destination-over';
         }
 
-        // РИСУЕМ КАМЕРУ (если фото есть, она отрисуется только в "дырке")
+        // 2. Включаем трафарет (дырку)
+        ctx.save(); 
+        ctx.beginPath();
+        ctx.arc(canvas.width / 2, canvas.height / 2, 400, 0, Math.PI * 2);
+        
+        if (userPhoto) {
+            ctx.clip(); 
+        }
+
+        // 3. Рисуем видео в дырке
         const camScale = Math.max(canvas.width / video.videoWidth, canvas.height / video.videoHeight);
         const camX = (canvas.width / 2) - (video.videoWidth / 2) * camScale;
         const camY = (canvas.height / 2) - (video.videoHeight / 2) * camScale;
         
         ctx.drawImage(video, camX, camY, video.videoWidth * camScale, video.videoHeight * camScale);
-        
-        // Сбрасываем режимы смешивания
-        ctx.globalCompositeOperation = 'source-over';
-        
+
+        ctx.restore();
         requestAnimationFrame(drawLoop);
     }
 
