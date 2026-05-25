@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yliko Color Code - Smart Masking</title>
+    <title>Yliko Color Code - Photo Capture</title>
     <script src="https://cdn.jsdelivr.net/npm/heic2any/dist/heic2any.min.js"></script>
     <style>
         body { 
@@ -16,7 +16,7 @@
             margin: 0; 
             font-family: sans-serif;
             overflow: hidden;
-            gap: 15px;
+            position: relative;
         }
         canvas { 
             background: #000; 
@@ -27,45 +27,78 @@
         }
         video { display: none; }
         
-        .upload-btn {
-            background: #4CAF50;
-            color: white;
-            padding: 12px 24px;
+        #status {
+            position: absolute;
+            top: 20px;
+            color: #4CAF50;
+            font-size: 16px;
+            font-weight: bold;
+            text-align: center;
+            z-index: 100;
+            background: rgba(0,0,0,0.6);
+            padding: 8px 16px;
             border-radius: 20px;
+        }
+
+        /* --- ПАНЕЛЬ КНОПОК --- */
+        .controls-container {
+            position: absolute;
+            bottom: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+            /* Скрыта до загрузки ИИ */
+            display: none; 
+        }
+
+        .btn {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 25px;
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
-            border: none;
-            transition: background 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s;
             text-align: center;
-            min-width: 250px;
         }
-        .upload-btn.loading {
+
+        .btn:active {
+            transform: scale(0.95);
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Кнопка "Сделать фото" делаем акцентной */
+        .btn-capture {
+            background: #007AFF;
+            border-color: #007AFF;
+        }
+
+        .btn.loading {
             background: #f39c12;
             pointer-events: none;
+            opacity: 0.8;
         }
         input[type="file"] { display: none; }
-        
-        #status {
-            color: #4CAF50;
-            font-size: 16px;
-            height: 20px;
-            font-weight: bold;
-            text-align: center;
-        }
     </style>
 </head>
 <body>
 
 <div id="status">Загрузка ИИ... Пожалуйста, подождите.</div>
 
-<label class="upload-btn" id="uploadLabel" style="display: none;">
-    Загрузить фото
-    <input type="file" id="imageUpload" accept="image/*, .heic, .heif">
-</label>
-
 <video id="videoElement" autoplay playsinline></video>
 <canvas id="mainCanvas" width="1080" height="1920"></canvas>
+
+<div class="controls-container" id="controls">
+    <label class="btn" id="uploadLabel">
+        📂 Загрузить
+        <input type="file" id="imageUpload" accept="image/*, .heic, .heif">
+    </label>
+    
+    <button class="btn btn-capture" id="captureBtn">📸 Сделать фото</button>
+</div>
 
 <script type="module">
     import { ImageSegmenter, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3";
@@ -73,7 +106,10 @@
     const video = document.getElementById('videoElement');
     const canvas = document.getElementById('mainCanvas');
     const ctx = canvas.getContext('2d');
+    
+    const controls = document.getElementById('controls');
     const uploadLabel = document.getElementById('uploadLabel');
+    const captureBtn = document.getElementById('captureBtn');
     const statusText = document.getElementById('status');
     
     let processedCanvas = null; 
@@ -97,7 +133,8 @@
             
             statusText.style.color = 'white';
             statusText.innerText = "ИИ готов!";
-            uploadLabel.style.display = "block";
+            // Показываем кнопки
+            controls.style.display = "flex";
             setTimeout(() => statusText.style.display = 'none', 3000);
         } catch (error) {
             console.error(error);
@@ -106,19 +143,17 @@
         }
     }
 
-    // --- 2. НАДЕЖНОЕ ВЫРЕЗАНИЕ (Через невидимый холст) ---
+    // --- 2. ФУНКЦИЯ ВЫРЕЗАНИЯ ---
     async function processImageToMask(img) {
         statusText.style.display = 'block';
-        statusText.innerText = "Нейросеть вырезает одежду...";
+        statusText.innerText = "Вырезаем одежду...";
         
         try {
-            // 1. Получаем маску от ИИ
             const segmentationResult = await segmenter.segment(img);
             const maskWidth = segmentationResult.categoryMask.width;
             const maskHeight = segmentationResult.categoryMask.height;
             const maskArray = segmentationResult.categoryMask.getAsUint8Array();
 
-            // 2. Создаем невидимый холст чисто для маски (черно-белой)
             const maskCanvas = document.createElement('canvas');
             maskCanvas.width = maskWidth;
             maskCanvas.height = maskHeight;
@@ -127,27 +162,26 @@
 
             let clothesFound = false;
 
-            // 3. Формируем трафарет: одежда становится черной и плотной, остальное прозрачным
             for (let i = 0; i < maskArray.length; i++) {
-                if (maskArray[i] === 4) { // 4 - это код одежды в MediaPipe
+                if (maskArray[i] === 4) { // 4 - код одежды
                     clothesFound = true;
-                    maskImageData.data[i * 4 + 0] = 0; // R
-                    maskImageData.data[i * 4 + 1] = 0; // G
-                    maskImageData.data[i * 4 + 2] = 0; // B
-                    maskImageData.data[i * 4 + 3] = 255; // Плотный (непрозрачный) цвет
+                    maskImageData.data[i * 4 + 0] = 0; 
+                    maskImageData.data[i * 4 + 1] = 0; 
+                    maskImageData.data[i * 4 + 2] = 0; 
+                    maskImageData.data[i * 4 + 3] = 255; 
                 } else {
-                    maskImageData.data[i * 4 + 3] = 0; // Прозрачный фон
+                    maskImageData.data[i * 4 + 3] = 0; 
                 }
             }
 
             if (!clothesFound) {
-                alert("Нейросеть не смогла распознать одежду на этом фото. Попробуйте другое!");
+                alert("Нейросеть не нашла одежду. Встаньте так, чтобы было видно плечи и торс!");
+                statusText.style.display = 'none';
+                return;
             }
 
-            // Кладем сгенерированные пиксели на холст маски
             maskCtx.putImageData(maskImageData, 0, 0);
 
-            // 4. Защита от перегрузки браузера (ограничиваем размер финального фото)
             const MAX_SIZE = 1080;
             let pWidth = img.width;
             let pHeight = img.height;
@@ -157,34 +191,56 @@
                 pHeight = Math.round(pHeight * ratio);
             }
 
-            // 5. Создаем ФИНАЛЬНЫЙ невидимый холст для готовой фотографии
             processedCanvas = document.createElement('canvas');
             processedCanvas.width = pWidth;
             processedCanvas.height = pHeight;
             const pCtx = processedCanvas.getContext('2d');
 
-            // Рисуем оригинальное фото
             pCtx.drawImage(img, 0, 0, pWidth, pHeight);
-
-            // Режим "вырезания": следующий нарисованный элемент прорежет дырку
             pCtx.globalCompositeOperation = 'destination-out';
-            
-            // Накладываем нашу маску поверх фото. Canvas автоматически подгонит размер маски под фото!
             pCtx.drawImage(maskCanvas, 0, 0, pWidth, pHeight);
-            
-            // Возвращаем режим в нормальный
             pCtx.globalCompositeOperation = 'source-over';
 
             statusText.innerText = "Готово!";
             setTimeout(() => statusText.style.display = 'none', 2000);
             
         } catch (err) {
-            console.error("Ошибка сегментации:", err);
+            console.error(err);
             statusText.innerText = "Ошибка при вырезании!";
         }
     }
 
-    // --- 3. ОБРАБОТКА ЗАГРУЗКИ ---
+    // --- 3. ОБРАБОТКА "СДЕЛАТЬ ФОТО" (Новая логика) ---
+    captureBtn.addEventListener('click', async () => {
+        captureBtn.classList.add('loading');
+        captureBtn.innerText = 'Снимок...';
+
+        // Создаем временный холст строго под формат нашего экрана (1080x1920)
+        const snapCanvas = document.createElement('canvas');
+        snapCanvas.width = 1080;
+        snapCanvas.height = 1920;
+        const sCtx = snapCanvas.getContext('2d');
+
+        // Используем математику кропа, чтобы сфоткать ровно то, что видит человек
+        const scale = Math.max(snapCanvas.width / video.videoWidth, snapCanvas.height / video.videoHeight);
+        const camX = (snapCanvas.width / 2) - (video.videoWidth / 2) * scale;
+        const camY = (snapCanvas.height / 2) - (video.videoHeight / 2) * scale;
+
+        // Рисуем текущий кадр видео на холст
+        sCtx.drawImage(video, camX, camY, video.videoWidth * scale, video.videoHeight * scale);
+
+        // Превращаем холст в картинку и отправляем в нейросеть
+        const snapshot = new Image();
+        snapshot.onload = async function() {
+            await processImageToMask(snapshot);
+            captureBtn.classList.remove('loading');
+            captureBtn.innerText = '📸 Сделать фото';
+        };
+        // Конвертируем в JPEG с качеством 90%
+        snapshot.src = snapCanvas.toDataURL('image/jpeg', 0.9);
+    });
+
+    // --- 4. ОБРАБОТКА "ЗАГРУЗИТЬ ФОТО" ---
     document.getElementById('imageUpload').addEventListener('change', async function(e) {
         let file = e.target.files[0];
         if (!file) return;
@@ -200,7 +256,7 @@
                 file = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
             } catch (error) {
                 alert("Не удалось прочитать HEIC.");
-                uploadLabel.innerHTML = 'Загрузить фото';
+                uploadLabel.innerHTML = '📂 Загрузить';
                 uploadLabel.classList.remove('loading');
                 return;
             }
@@ -209,13 +265,13 @@
         const img = new Image();
         img.onload = async function() {
             await processImageToMask(img); 
-            uploadLabel.innerHTML = 'Загрузить другое фото';
+            uploadLabel.innerHTML = '📂 Загрузить';
             uploadLabel.classList.remove('loading');
         }
         img.src = URL.createObjectURL(file);
     });
 
-    // --- 4. КАМЕРА ---
+    // --- 5. КАМЕРА ---
     async function initCamera() {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ 
@@ -231,17 +287,15 @@
         }
     }
 
-    // --- 5. ЦИКЛ ОТРИСОВКИ ---
+    // --- 6. ЦИКЛ ОТРИСОВКИ ---
     function drawLoop() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // 1. СНАЧАЛА рисуем камеру 
         const camScale = Math.max(canvas.width / video.videoWidth, canvas.height / video.videoHeight);
         const camX = (canvas.width / 2) - (video.videoWidth / 2) * camScale;
         const camY = (canvas.height / 2) - (video.videoHeight / 2) * camScale;
         ctx.drawImage(video, camX, camY, video.videoWidth * camScale, video.videoHeight * camScale);
 
-        // 2. ЗАТЕМ сверху кидаем обработанное фото
         if (processedCanvas) {
             const scale = Math.max(canvas.width / processedCanvas.width, canvas.height / processedCanvas.height);
             const x = (canvas.width / 2) - (processedCanvas.width / 2) * scale;
