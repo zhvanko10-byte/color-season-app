@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yliko Color Code - Dual Camera</title>
+    <title>Yliko Color Code - Stable iOS Version</title>
     <script src="https://cdn.jsdelivr.net/npm/heic2any/dist/heic2any.min.js"></script>
     <style>
         body { 
@@ -45,7 +45,7 @@
             position: absolute;
             bottom: 30px;
             display: flex;
-            flex-wrap: wrap; /* Позволяет кнопкам переноситься на маленьких экранах */
+            flex-wrap: wrap; 
             justify-content: center;
             gap: 10px;
             z-index: 100;
@@ -121,9 +121,8 @@
     let processedCanvas = null; 
     let segmenter = null;
 
-    // Переменные для управления камерой
     let currentStream = null;
-    let currentFacingMode = "user"; // Начинаем с селфи-камеры
+    let currentFacingMode = "user"; 
     let isDrawingLoopRunning = false;
 
     // --- 1. ЗАГРУЗКА ИИ ---
@@ -135,7 +134,8 @@
             segmenter = await ImageSegmenter.createFromOptions(vision, {
                 baseOptions: {
                     modelAssetPath: "https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_multiclass_256x256/float32/latest/selfie_multiclass_256x256.tflite",
-                    delegate: "GPU"
+                    // КРИТИЧЕСКОЕ ИЗМЕНЕНИЕ ДЛЯ СТАБИЛЬНОСТИ НА iOS:
+                    delegate: "CPU" 
                 },
                 runningMode: "IMAGE",
                 outputCategoryMask: true,
@@ -173,7 +173,7 @@
             let clothesFound = false;
 
             for (let i = 0; i < maskArray.length; i++) {
-                if (maskArray[i] === 4) { 
+                if (maskArray[i] === 4) { // 4 - код одежды
                     clothesFound = true;
                     maskImageData.data[i * 4 + 0] = 0; 
                     maskImageData.data[i * 4 + 1] = 0; 
@@ -192,6 +192,7 @@
 
             maskCtx.putImageData(maskImageData, 0, 0);
 
+            // Жесткое ограничение размера для защиты от вылетов памяти
             const MAX_SIZE = 1080;
             let pWidth = img.width;
             let pHeight = img.height;
@@ -236,7 +237,6 @@
         const camW = video.videoWidth * scale;
         const camH = video.videoHeight * scale;
 
-        // Если это селфи, фото тоже нужно отзеркалить при сохранении
         if (currentFacingMode === "user") {
             sCtx.save();
             sCtx.translate(snapCanvas.width, 0);
@@ -287,9 +287,8 @@
         img.src = URL.createObjectURL(file);
     });
 
-    // --- 5. УПРАВЛЕНИЕ КАМЕРОЙ (Смена и инициализация) ---
+    // --- 5. УПРАВЛЕНИЕ КАМЕРОЙ ---
     async function initCamera() {
-        // Если камера уже работает, выключаем её перед запуском новой
         if (currentStream) {
             currentStream.getTracks().forEach(track => track.stop());
         }
@@ -302,7 +301,6 @@
             
             video.onloadedmetadata = () => {
                 video.play();
-                // Запускаем цикл отрисовки только один раз
                 if (!isDrawingLoopRunning) {
                     isDrawingLoopRunning = true;
                     requestAnimationFrame(drawLoop);
@@ -314,7 +312,6 @@
     }
 
     switchCameraBtn.addEventListener('click', () => {
-        // Меняем режим на противоположный
         currentFacingMode = currentFacingMode === "user" ? "environment" : "user";
         initCamera();
     });
@@ -329,15 +326,13 @@
         const camW = video.videoWidth * camScale;
         const camH = video.videoHeight * camScale;
 
-        // ЭФФЕКТ ЗЕРКАЛА ДЛЯ СЕЛФИ КАМЕРЫ
         if (currentFacingMode === "user") {
             ctx.save();
-            ctx.translate(canvas.width, 0); // Сдвигаем координаты вправо
-            ctx.scale(-1, 1); // Отражаем по оси X
+            ctx.translate(canvas.width, 0); 
+            ctx.scale(-1, 1); 
             ctx.drawImage(video, camX, camY, camW, camH);
             ctx.restore();
         } else {
-            // Обычная отрисовка для задней камеры
             ctx.drawImage(video, camX, camY, camW, camH);
         }
 
