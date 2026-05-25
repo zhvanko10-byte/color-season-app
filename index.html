@@ -1,475 +1,74 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Yliko Color Code</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Montserrat:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Code - Camera Test</title>
     <style>
-        /* --- СИНХРОНІЗАЦІЯ КОЛЬОРІВ ТЕМ --- */
-        :root {
-            --bg-main: #000000;
-            --text-main: #ffffff;
-            --border-main: #ffffff;
-            --card-outer-bg: #111111;
-            --card-outer-border: rgba(255, 255, 255, 0.2);
-            --card-top-bg: transparent;
-            --card-top-text: #ffffff;
-            --card-bottom-bg: transparent;
-            --btn-active-bg: #ffffff;
-            --btn-active-text: #000000;
-            --lang-inactive: #555555;
-        }
-
-        body.theme-light {
-            --bg-main: #f5f5f7;
-            --text-main: #1d1d1f;
-            --border-main: #1d1d1f;
-            --card-outer-bg: #ffffff;
-            --card-outer-border: rgba(0, 0, 0, 0.1);
-            --card-top-bg: transparent; 
-            --card-top-text: #1d1d1f;
-            --card-bottom-bg: transparent;
-            --btn-active-bg: #1d1d1f;
-            --btn-active-text: #ffffff;
-            --lang-inactive: #999999;
-        }
-
-        body.theme-color {
-            --bg-main: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
-            --text-main: #1d1d1f;
-            --border-main: rgba(29, 29, 31, 0.5);
-            --card-outer-bg: rgba(255, 255, 255, 0.45);
-            --card-outer-border: rgba(255, 255, 255, 0.6);
-            --card-top-bg: transparent;
-            --card-top-text: #1d1d1f;
-            --card-bottom-bg: transparent;
-            --btn-active-bg: #1d1d1f;
-            --btn-active-text: #ffffff;
-            --lang-inactive: rgba(29, 29, 31, 0.5);
-        }
-
-        body, html {
-            margin: 0; padding: 0;
-            width: 100%; height: 100%;
-            background: var(--bg-main);
-            color: var(--text-main);
-            overflow: hidden;
-            font-family: 'Montserrat', sans-serif;
-            -webkit-tap-highlight-color: transparent;
-            transition: background 0.5s ease, color 0.5s ease;
-        }
-
-        /* Кнопки керування */
-        .theme-switch {
-            position: absolute; top: 25px; left: 25px;
-            z-index: 500; font-size: 22px; cursor: pointer;
-            background: none; border: none; padding: 5px;
-            transition: 0.3s;
-        }
-        .theme-switch:active { transform: scale(0.85); }
-
-        .lang-switch {
-            position: absolute; top: 30px; right: 30px;
-            z-index: 500; font-size: 12px; letter-spacing: 2px;
-        }
-        .lang-btn { background: none; border: none; color: var(--lang-inactive); cursor: pointer; padding: 5px; font-family: 'Montserrat', sans-serif; transition: 0.3s;}
-        .lang-btn.active { color: var(--text-main); font-weight: bold; }
-
-        .page {
-            position: absolute; top: 0; left: 0;
-            width: 100%; height: 100%;
-            display: none;
-            flex-direction: column; 
+        body { 
+            display: flex; 
+            justify-content: center; 
             align-items: center; 
-            justify-content: center;
-            background: var(--bg-main);
-            z-index: 100;
-            transition: background 0.5s ease;
+            height: 100vh; 
+            background: #111; 
+            margin: 0; 
+            font-family: sans-serif;
         }
-        .page.active { display: flex; }
-
-        #main-page h1 {
-            font-family: 'Playfair Display', serif;
-            font-size: 38px; font-style: italic;
-            margin-bottom: 40px; letter-spacing: 1px; text-align: center;
+        /* Холст, на котором будет происходить вся магия */
+        canvas { 
+            background: #000; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.8);
+            /* Визуально уменьшаем для экрана, но внутри он остается 1080x1080 */
+            width: 100%; 
+            max-width: 400px; 
+            border-radius: 12px;
         }
-        .buttons-container { display: flex; flex-direction: column; gap: 20px; }
-        .start-btn {
-            background: transparent; color: var(--text-main); border: 1px solid var(--border-main);
-            padding: 16px 50px; border-radius: 40px;
-            font-size: 13px; text-transform: uppercase; letter-spacing: 3px;
-            cursor: pointer; width: 260px; font-family: 'Montserrat', sans-serif;
-            transition: 0.3s; z-index: 200; position: relative;
-        }
-        .start-btn:active { background: var(--btn-active-bg); color: var(--btn-active-text); }
-
-        .back-btn {
-            position: absolute; top: 30px; left: 20px;
-            background: none; border: none; color: var(--text-main); font-size: 24px;
-            cursor: pointer; z-index: 1000;
-        }
-
-        /* Камера та палітри */
-        #video-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
-        #video { width: 100%; height: 100%; object-fit: cover; }
-        #ui-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 2; display: flex; flex-direction: column; pointer-events: none;
-        }
-        #header { padding: 80px 20px 20px; text-align: center; pointer-events: auto; }
-        #palette-name {
-            font-family: 'Playfair Display', serif; font-size: 44px;
-            text-transform: uppercase; letter-spacing: 4px; font-style: italic;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.8); margin: 0; 
-            color: white; 
-        }
-        .palette-swiper { width: 100%; height: 100%; pointer-events: auto; }
-        .color-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; width: 85%; max-width: 400px; margin: auto; }
-        .dot { aspect-ratio: 1/1; border-radius: 50%; border: 1px solid rgba(255,255,255,0.3); }
-
-        /* ОПТИМІЗОВАНІ ТЕСТОВІ КАРТКИ */
-        #test-container {
-            position: relative; width: 90%; max-width: 380px; 
-            height: 78dvh; display: flex; align-items: center; justify-content: center;
-        }
-        
-        .test-card {
-            position: absolute; width: 100%; height: 100%;
-            background: var(--card-outer-bg); 
-            border: 1px solid var(--card-outer-border);
-            border-radius: 20px; display: none; flex-direction: column; 
-            overflow: hidden; box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
-            transition: background 0.5s ease, border 0.5s ease;
-        }
-        .test-card.active { display: flex; }
-
-        .card-top {
-            background: var(--card-top-bg); 
-            color: var(--card-top-text);
-            flex: 1; display: flex; flex-direction: column;
-            overflow: hidden; 
-        }
-
-        .card-title {
-            font-family: 'Playfair Display', serif; font-size: 18px;
-            text-transform: uppercase; letter-spacing: 1px;
-            padding: 15px 10px 10px; margin: 0; text-align: center; flex-shrink: 0;
-        }
-
-        .test-swiper { 
-            width: 100%; flex: 1; min-height: 0; 
-            padding-bottom: 40px; box-sizing: border-box;
-        }
-        
-        .card-photo {
-            width: 100%; height: 37dvh; /* Зменшено для економії місця */
-            object-fit: cover;
-            border-top: 1px solid var(--card-outer-border);
-            border-bottom: 1px solid var(--card-outer-border);
-            flex-shrink: 0;
-        }
-
-        .card-desc {
-            padding: 12px 15px; font-family: 'Montserrat', sans-serif;
-            font-size: 13.5px; font-weight: 500; line-height: 1.5; text-align: center;
-            overflow-y: auto; flex: 1; -webkit-overflow-scrolling: touch;
-            display: flex; flex-direction: column; justify-content: center;
-        }
-
-        .swipe-hint {
-            position: absolute; bottom: 6px; left: 0; width: 100%;
-            text-align: center; font-size: 9px; color: var(--lang-inactive); 
-            text-transform: uppercase; letter-spacing: 1px;
-            z-index: 10; pointer-events: none;
-        }
-        
-        .test-swiper .swiper-pagination-bullet { background: var(--lang-inactive); }
-        .test-swiper .swiper-pagination-bullet-active { background: var(--card-top-text); }
-        .test-swiper .swiper-pagination { 
-            position: absolute; bottom: 20px; left: 0; width: 100%;
-            z-index: 10; margin: 0;
-        }
-
-        .test-actions { 
-            display: flex; gap: 10px; padding: 15px 20px 20px; 
-            background: var(--card-bottom-bg); flex-shrink: 0; 
-        }
-        .t-btn { 
-            flex: 1; padding: 14px; background: transparent; border: 1px solid var(--text-main); 
-            color: var(--text-main); border-radius: 30px; text-transform: uppercase; 
-            font-size: 11px; font-weight: 700; letter-spacing: 2px; 
-            cursor: pointer; transition: 0.3s;
-        }
-        .t-btn:active { background: var(--btn-active-bg); color: var(--btn-active-text); }
+        /* Скрываем оригинальное видео, оно нам нужно только как источник данных */
+        video { display: none; }
     </style>
 </head>
 <body>
 
-    <button class="theme-switch" id="theme-btn" onclick="window.toggleTheme()">🌗</button>
+<video id="videoElement" autoplay playsinline></video>
 
-    <div class="lang-switch">
-        <button class="lang-btn active" id="l-uk" onclick="window.setLang('uk')">UKR</button> | 
-        <button class="lang-btn" id="l-en" onclick="window.setLang('en')">ENG</button>
-    </div>
+<canvas id="mainCanvas" width="1080" height="1080"></canvas>
 
-    <div id="main-page" class="page active">
-        <h1>Yliko Color Code</h1>
-        <div class="buttons-container">
-            <button class="start-btn" id="btn-start" onclick="window.openCamera()">Почати</button>
-            <button class="start-btn" id="btn-test" onclick="window.openTest()">Тестування</button>
-        </div>
-    </div>
+<script>
+    const video = document.getElementById('videoElement');
+    const canvas = document.getElementById('mainCanvas');
+    const ctx = canvas.getContext('2d');
 
-    <div id="app-page" class="page">
-        <button class="back-btn" onclick="window.closeCamera()">✕</button>
-        <div id="video-container"><video id="video" autoplay playsinline muted></video></div>
-        <div id="ui-overlay">
-            <div id="header"><h1 id="palette-name">LIGHT</h1></div>
-            <div class="swiper palette-swiper">
-                <div class="swiper-wrapper" id="palette-wrapper"></div>
-                <div class="swiper-pagination"></div>
-            </div>
-        </div>
-    </div>
-
-    <div id="test-page" class="page">
-        <button class="back-btn" onclick="window.showPage('main-page')">✕</button>
-        <div id="test-container"></div>
-    </div>
-
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-
-    <script>
+    async function initCamera() {
         try {
-            const themes = ['dark', 'light', 'color'];
-            let currentThemeIndex = 0;
-            window.toggleTheme = function() {
-                currentThemeIndex = (currentThemeIndex + 1) % themes.length;
-                document.body.className = currentThemeIndex === 0 ? '' : 'theme-' + themes[currentThemeIndex];
+            // Запрашиваем доступ к камере (задней, если доступна)
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { facingMode: "environment" } 
+            });
+            video.srcObject = stream;
+            
+            // Ждем, пока видео прогрузится, и запускаем цикл отрисовки
+            video.onloadedmetadata = () => {
+                video.play();
+                requestAnimationFrame(drawLoop);
             };
-
-            const dict = { 
-                uk: { start: "Почати", test: "Тестування", yes: "Так", no: "Ні", swipe: "← гортайте фото →" }, 
-                en: { start: "Start", test: "Testing", yes: "Yes", no: "No", swipe: "← swipe photos →" } 
-            };
-            let currentLang = 'uk';
-            let paletteSwiper = null;
-            let cardSwipers = [];
-
-            const paletteData = [
-                { id: "light", name: "light", colors: ["#FFFFF0","#FFFFFF","#FAEBD7","#D2B48C","#BC8F8F","#A0522D","#DEB887","#696969","#808080","#D3D3D3","#2F4F4F","#8FBC8F","#DC143C","#000080","#800080","#FFB6C1","#FF69B4","#DB7093","#FFA07A","#F0E68C","#6A5ACD","#87CEEB","#7B68EE","#4169E1","#00BFFF","#AFEEEE","#9ACD32","#008000","#3CB371","#008080"] },
-                { id: "deep", name: "deep", colors: ["#FFFFF0","#FFFFFF","#8B4513","#D2B48C","#BC8F8F","#3b1d1d","#030000","#2b2a2a","#454545","#160859","#0c300c","#0b4a0a","#0a4a41","#39522d","#380a19","#f0f26b","#bad45d","#d681d2","#e83c3c","#b82c2c","#c9240a","#3e0f59","#5d339c","#52070e","#52073c","#2f591e","#0c382d","#0d2185","#1e40e8","#0f4e6e"] },
-                { id: "warm", name: "warm", colors: ["#FFFFF0","#FFFFFF","#FAEBD7","#D2B48C","#99715d","#4a310b","#3d3830","#292520","#3d2e22","#313a66","#224a31","#38330a","#736a1d","#999782","#5a337a","#82d7d9","#f5f37f","#e6bf35","#e67b17","#f0950c","#a1d158","#f7aa83","#bd5709","#e8571e","#eb4949","#ad3311","#e31b1b","#aa1be3","#3ac2e8","#658c5d"] },
-                { id: "cool", name: "cool", colors: ["#FFFFFF","#FAEBD7","#f0f0e4","#70736f","#c0c4c4","#6d93a6","#2b0606","#152433","#000000","#03331a","#1a472c","#09544f","#571cb0","#1621c4","#c90c4b","#e69ad5","#a76cab","#de41f0","#bddecb","#158244","#0c614c","#1b8a8c","#52e1e3","#96dfeb","#0a64a8","#5c1e61","#999ee8","#5157b0","#341994","#0c1761"] },
-                { id: "clear", name: "clear", colors: ["#FFFFF0","#FFFFFF","#D2B48C","#70736f","#c0c4c4","#3b1d1d","#030000","#2b2a2a","#160859","#571cb0","#1621c4","#0d2185","#066b14","#047d34","#c41b1b","#82d7d9","#f2f072","#999ee8","#f0a35b","#c42585","#cf2b2b","#8a0f0f","#90cf3e","#14e09c","#136120","#315bc4","#0ec2e6","#38178a","#46b4eb","#0da1b8"] },
-                { id: "soft", name: "soft", colors: ["#FFFFFF","#D2B48C","#BC8F8F","#e0bf87","#6e4931","#826653","#8B4513","#707050","#999782","#3d3830","#292520","#313a66","#243042","#08535e","#451733","#e8b8a0","#c456a0","#bd4626","#82d7d9","#258f2a","#3f9170","#69c27f","#2f5c35","#153d0d","#999ee8","#5157b0","#103575","#401f6b","#5a41a6","#59190f"] }
-            ];
-
-            const softDescriptionUK = "середні тони у всьому: волосся, очі, шкіра<br><br>немає різких контрастів.";
-            const softDescriptionEN = "medium tones in everything: hair, eyes, skin<br><br>no sharp contrasts.";
-
-            const testData = [
-                { 
-                    id: "light", uk_t: "1. СВІТЛИЙ КОЛОРИТ", en_t: "1. LIGHT TYPE",
-                    slides: [
-                        { img: "img/light.jpg", uk: "Світле волосся від кореня.<br>Світлі брови, вії.<br>Світлі очі (блакитні, сірі, зелені).<br>Світла шкіра.", en: "Light hair from roots.<br>Light eyebrows and eyelashes.<br>Light eyes (blue, grey, green).<br>Light skin." }
-                    ]
-                },
-                { 
-                    id: "deep", uk_t: "2. ТЕМНИЙ КОЛОРИТ", en_t: "2. DEEP TYPE",
-                    slides: [
-                        { img: "img/deep.jpg", uk: "Дуже темне волосся.<br>Темні очі та насичені кольори.", en: "Very dark hair.<br>Dark eyes and saturated colors." }
-                    ]
-                },
-                { 
-                    id: "warm", uk_t: "3. ТЕПЛИЙ КОЛОРИТ", en_t: "3. WARM TYPE",
-                    slides: [
-                        { img: "img/warm.jpg", uk: "Золотистий або рудий підтон<br>волосся та шкіри.", en: "Golden or reddish undertone<br>of hair and skin." }
-                    ]
-                },
-                { 
-                    id: "cool", uk_t: "4. ХОЛОДНИЙ КОЛОРИТ", en_t: "4. COOL TYPE",
-                    slides: [
-                        { img: "img/cool.jpg", uk: "Попелястий підтон,<br>шкіра з рожевим відтінком.", en: "Ashy undertone,<br>skin with a pinkish tint." }
-                    ]
-                },
-                { 
-                    id: "clear", uk_t: "5. КОНТРАСТНИЙ КОЛОРИТ", en_t: "5. CLEAR TYPE",
-                    slides: [
-                        { img: "img/clear_1.jpg", uk: "Світле волосся + темні очі", en: "Light hair + dark eyes" },
-                        { img: "img/clear_2.jpg", uk: "Темне волосся + світлі очі", en: "Dark hair + light eyes" },
-                        { img: "img/clear_3.jpg", uk: "Чорне волосся + дуже світла шкіра", en: "Black hair + very light skin" }
-                    ]
-                },
-                { 
-                    id: "soft", uk_t: "6. М'ЯКИЙ КОЛОРИТ", en_t: "6. SOFT TYPE",
-                    slides: [
-                        { img: "img/soft_1.jpg", uk: softDescriptionUK, en: softDescriptionEN },
-                        { img: "img/soft_2.jpg", uk: softDescriptionUK, en: softDescriptionEN },
-                        { img: "img/soft_3.jpg", uk: softDescriptionUK, en: softDescriptionEN },
-                        { img: "img/soft_4.jpg", uk: softDescriptionUK, en: softDescriptionEN },
-                        { img: "img/soft_5.jpg", uk: softDescriptionUK, en: softDescriptionEN }
-                    ]
-                }
-            ];
-
-            let currentCardIndex = 0;
-            let stream = null;
-
-            window.showPage = function(id) {
-                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-                document.getElementById(id).classList.add('active');
-                
-                const isMain = (id === 'main-page');
-                document.querySelector('.lang-switch').style.display = isMain ? 'block' : 'none';
-                document.querySelector('.theme-switch').style.display = isMain ? 'block' : 'none';
-            };
-
-            window.setLang = function(lang) {
-                currentLang = lang;
-                document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-                document.getElementById('l-' + lang).classList.add('active');
-                document.getElementById('btn-start').innerText = dict[lang].start;
-                document.getElementById('btn-test').innerText = dict[lang].test;
-                if(document.getElementById('test-page').classList.contains('active')) window.renderTestCards();
-            };
-
-            window.renderTestCards = function() {
-                if(cardSwipers.length > 0) {
-                    cardSwipers.forEach(s => s.destroy(true, true));
-                    cardSwipers = [];
-                }
-
-                const container = document.getElementById('test-container');
-                if(!container) return;
-                container.innerHTML = '';
-                
-                testData.forEach((card, index) => {
-                    let slidesHtml = '';
-                    card.slides.forEach(slide => {
-                        slidesHtml += `
-                            <div class="swiper-slide" style="display: flex; flex-direction: column;">
-                                <img src="${slide.img}" class="card-photo" alt="Photo" onerror="this.src='https://via.placeholder.com/400x500/F4F0EB/222222?text=Photo'">
-                                <div class="card-desc">${slide[currentLang]}</div>
-                            </div>
-                        `;
-                    });
-
-                    const needsSwipe = card.slides.length > 1;
-                    const hintHtml = needsSwipe ? `<div class="swiper-pagination"></div><div class="swipe-hint">${dict[currentLang].swipe}</div>` : '';
-
-                    const cardDiv = document.createElement('div');
-                    cardDiv.className = `test-card ${index === currentCardIndex ? 'active' : ''}`;
-                    cardDiv.innerHTML = `
-                        <div class="card-top">
-                            <h2 class="card-title">${card[`${currentLang}_t`]}</h2>
-                            <div class="swiper test-swiper">
-                                <div class="swiper-wrapper">
-                                    ${slidesHtml}
-                                </div>
-                                ${hintHtml}
-                            </div>
-                        </div>
-                        <div class="test-actions">
-                            <button class="t-btn" onclick="window.nextCard()">${dict[currentLang].no}</button>
-                            <button class="t-btn" onclick="window.finishTest('${card.id}')">${dict[currentLang].yes}</button>
-                        </div>
-                    `;
-                    container.appendChild(cardDiv);
-                });
-
-                if (typeof Swiper !== 'undefined') {
-                    cardSwipers = new Swiper('.test-swiper', {
-                        pagination: { el: '.swiper-pagination', clickable: true },
-                        observer: true,
-                        observeParents: true
-                    });
-                }
-            };
-
-            window.nextCard = function() {
-                currentCardIndex++;
-                if (currentCardIndex >= testData.length) currentCardIndex = 0;
-                window.renderTestCards();
-            };
-
-            window.finishTest = function(typeId) {
-                const targetIndex = paletteData.findIndex(p => p.id === typeId);
-                window.openCamera().then(() => {
-                    if(paletteSwiper) {
-                        paletteSwiper.slideToLoop(targetIndex, 0);
-                        document.getElementById('palette-name').innerText = paletteData[targetIndex].name;
-                    }
-                });
-            };
-
-            window.openTest = function() {
-                currentCardIndex = 0;
-                window.renderTestCards();
-                window.showPage('test-page');
-            };
-
-            window.openCamera = async function() {
-                window.showPage('app-page');
-                try {
-                    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment", width: { ideal: 1920 } } });
-                    document.getElementById('video').srcObject = stream;
-                } catch (e) { console.log("Камера недоступна"); }
-            };
-
-            window.closeCamera = function() {
-                if(stream) stream.getTracks().forEach(t => t.stop());
-                window.showPage('main-page');
-            };
-
-            window.initPalettes = function() {
-                const wrapper = document.getElementById('palette-wrapper');
-                if(!wrapper) return;
-                paletteData.forEach(p => {
-                    const slide = document.createElement('div');
-                    slide.className = 'swiper-slide';
-                    const grid = document.createElement('div');
-                    grid.className = 'color-grid';
-                    p.colors.forEach(c => {
-                        const dot = document.createElement('div');
-                        dot.className = 'dot'; dot.style.backgroundColor = c;
-                        grid.appendChild(dot);
-                    });
-                    slide.appendChild(grid);
-                    wrapper.appendChild(slide);
-                });
-
-                if (typeof Swiper !== 'undefined') {
-                    paletteSwiper = new Swiper('.palette-swiper', {
-                        loop: true,
-                        pagination: { el: '.swiper-pagination', clickable: true },
-                        on: {
-                            slideChange: function () {
-                                document.getElementById('palette-name').innerText = paletteData[this.realIndex].name;
-                            }
-                        }
-                    });
-                }
-            };
-
-            window.onload = () => {
-                if (window.Telegram && window.Telegram.WebApp) {
-                    window.Telegram.WebApp.expand();
-                }
-                window.initPalettes();
-            };
-
-        } catch (error) {
-            console.error("JS Error:", error);
+        } catch (err) {
+            console.error("Ошибка доступа к камере: ", err);
+            alert("Пожалуйста, разрешите доступ к камере в браузере.");
         }
-    </script>
+    }
+
+    // Бесконечный цикл, который рисует кадры из видео на холст
+    function drawLoop() {
+        // Отрисовываем видео, растягивая его на наши 1080x1080
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        // Запускаем следующий кадр
+        requestAnimationFrame(drawLoop);
+    }
+
+    // Старт
+    initCamera();
+</script>
+
 </body>
 </html>
