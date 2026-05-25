@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Color Code - Camera Test</title>
+    <title>Yliko Color Code - Camera Test</title>
     <style>
         body { 
             display: flex; 
@@ -13,25 +13,23 @@
             background: #111; 
             margin: 0; 
             font-family: sans-serif;
+            overflow: hidden;
         }
-        /* Холст, на котором будет происходить вся магия */
         canvas { 
             background: #000; 
             box-shadow: 0 4px 20px rgba(0,0,0,0.8);
-            /* Визуально уменьшаем для экрана, но внутри он остается 1080x1080 */
-            width: 100%; 
-            max-width: 400px; 
+            /* Делаем так, чтобы холст помещался на экран монитора, сохраняя пропорции телефона */
+            height: 90vh; 
+            aspect-ratio: 9/16; 
             border-radius: 12px;
         }
-        /* Скрываем оригинальное видео, оно нам нужно только как источник данных */
         video { display: none; }
     </style>
 </head>
 <body>
 
 <video id="videoElement" autoplay playsinline></video>
-
-<canvas id="mainCanvas" width="1080" height="1080"></canvas>
+<canvas id="mainCanvas" width="1080" height="1920"></canvas>
 
 <script>
     const video = document.getElementById('videoElement');
@@ -40,13 +38,11 @@
 
     async function initCamera() {
         try {
-            // Запрашиваем доступ к камере (задней, если доступна)
             const stream = await navigator.mediaDevices.getUserMedia({ 
                 video: { facingMode: "environment" } 
             });
             video.srcObject = stream;
             
-            // Ждем, пока видео прогрузится, и запускаем цикл отрисовки
             video.onloadedmetadata = () => {
                 video.play();
                 requestAnimationFrame(drawLoop);
@@ -57,16 +53,21 @@
         }
     }
 
-    // Бесконечный цикл, который рисует кадры из видео на холст
     function drawLoop() {
-        // Отрисовываем видео, растягивая его на наши 1080x1080
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        // Очищаем холст перед каждым кадром
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Математика для правильного заполнения прямоугольника (без искажений пропорций)
+        const scale = Math.max(canvas.width / video.videoWidth, canvas.height / video.videoHeight);
+        const x = (canvas.width / 2) - (video.videoWidth / 2) * scale;
+        const y = (canvas.height / 2) - (video.videoHeight / 2) * scale;
         
-        // Запускаем следующий кадр
+        // Рисуем отцентрированное видео
+        ctx.drawImage(video, x, y, video.videoWidth * scale, video.videoHeight * scale);
+        
         requestAnimationFrame(drawLoop);
     }
 
-    // Старт
     initCamera();
 </script>
 
