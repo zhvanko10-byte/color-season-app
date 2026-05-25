@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yliko Color Code - Pixel Masking</title>
+    <title>Yliko Color Code - Smart Masking</title>
     <script src="https://cdn.jsdelivr.net/npm/heic2any/dist/heic2any.min.js"></script>
     <style>
         body { 
@@ -76,7 +76,7 @@
     const uploadLabel = document.getElementById('uploadLabel');
     const statusText = document.getElementById('status');
     
-    let processedCanvas = null; // Здесь будет лежать готовое фото с "дыркой"
+    let processedCanvas = null; 
     let segmenter = null;
 
     // --- 1. ЗАГРУЗКА ИИ ---
@@ -106,52 +106,78 @@
         }
     }
 
-    // --- 2. ЖЕЛЕЗОБЕТОННОЕ ВЫРЕЗАНИЕ (Попиксельное) ---
+    // --- 2. НАДЕЖНОЕ ВЫРЕЗАНИЕ (Через невидимый холст) ---
     async function processImageToMask(img) {
         statusText.style.display = 'block';
         statusText.innerText = "Нейросеть вырезает одежду...";
         
-        // Сжимаем фото до безопасных размеров (не больше 1080px), чтобы браузер не вылетал
-        const MAX_SIZE = 1080;
-        let pWidth = img.width;
-        let pHeight = img.height;
-        if (pWidth > MAX_SIZE || pHeight > MAX_SIZE) {
-            const ratio = Math.min(MAX_SIZE / pWidth, MAX_SIZE / pHeight);
-            pWidth = Math.round(pWidth * ratio);
-            pHeight = Math.round(pHeight * ratio);
-        }
-
-        // Создаем холст для работы с пикселями
-        processedCanvas = document.createElement('canvas');
-        processedCanvas.width = pWidth;
-        processedCanvas.height = pHeight;
-        const pCtx = processedCanvas.getContext('2d', { willReadFrequently: true });
-        
-        // Рисуем туда оригинальное фото
-        pCtx.drawImage(img, 0, 0, pWidth, pHeight);
-
         try {
-            // Отправляем холст в нейросеть
-            const segmentationResult = await segmenter.segment(processedCanvas);
-            const maskDataArray = segmentationResult.categoryMask.getAsUint8Array();
-            
-            // Вытягиваем массив пикселей из нашей фотографии
-            const imageData = pCtx.getImageData(0, 0, pWidth, pHeight);
-            const data = imageData.data;
+            // 1. Получаем маску от ИИ
+            const segmentationResult = await segmenter.segment(img);
+            const maskWidth = segmentationResult.categoryMask.width;
+            const maskHeight = segmentationResult.categoryMask.height;
+            const maskArray = segmentationResult.categoryMask.getAsUint8Array();
 
-            // Пробегаемся по каждому пикселю
-            for (let i = 0; i < maskDataArray.length; i++) {
-                if (maskDataArray[i] === 4) { 
-                    // Категория 4 — это одежда. Делаем этот пиксель на фото полностью прозрачным (Альфа = 0)
-                    data[i * 4 + 3] = 0; 
+            // 2. Создаем невидимый холст чисто для маски (черно-белой)
+            const maskCanvas = document.createElement('canvas');
+            maskCanvas.width = maskWidth;
+            maskCanvas.height = maskHeight;
+            const maskCtx = maskCanvas.getContext('2d');
+            const maskImageData = maskCtx.createImageData(maskWidth, maskHeight);
+
+            let clothesFound = false;
+
+            // 3. Формируем трафарет: одежда становится черной и плотной, остальное прозрачным
+            for (let i = 0; i < maskArray.length; i++) {
+                if (maskArray[i] === 4) { // 4 - это код одежды в MediaPipe
+                    clothesFound = true;
+                    maskImageData.data[i * 4 + 0] = 0; // R
+                    maskImageData.data[i * 4 + 1] = 0; // G
+                    maskImageData.data[i * 4 + 2] = 0; // B
+                    maskImageData.data[i * 4 + 3] = 255; // Плотный (непрозрачный) цвет
+                } else {
+                    maskImageData.data[i * 4 + 3] = 0; // Прозрачный фон
                 }
             }
 
-            // Возвращаем измененные пиксели обратно на холст
-            pCtx.putImageData(imageData, 0, 0);
+            if (!clothesFound) {
+                alert("Нейросеть не смогла распознать одежду на этом фото. Попробуйте другое!");
+            }
+
+            // Кладем сгенерированные пиксели на холст маски
+            maskCtx.putImageData(maskImageData, 0, 0);
+
+            // 4. Защита от перегрузки браузера (ограничиваем размер финального фото)
+            const MAX_SIZE = 1080;
+            let pWidth = img.width;
+            let pHeight = img.height;
+            if (pWidth > MAX_SIZE || pHeight > MAX_SIZE) {
+                const ratio = Math.min(MAX_SIZE / pWidth, MAX_SIZE / pHeight);
+                pWidth = Math.round(pWidth * ratio);
+                pHeight = Math.round(pHeight * ratio);
+            }
+
+            // 5. Создаем ФИНАЛЬНЫЙ невидимый холст для готовой фотографии
+            processedCanvas = document.createElement('canvas');
+            processedCanvas.width = pWidth;
+            processedCanvas.height = pHeight;
+            const pCtx = processedCanvas.getContext('2d');
+
+            // Рисуем оригинальное фото
+            pCtx.drawImage(img, 0, 0, pWidth, pHeight);
+
+            // Режим "вырезания": следующий нарисованный элемент прорежет дырку
+            pCtx.globalCompositeOperation = 'destination-out';
             
+            // Накладываем нашу маску поверх фото. Canvas автоматически подгонит размер маски под фото!
+            pCtx.drawImage(maskCanvas, 0, 0, pWidth, pHeight);
+            
+            // Возвращаем режим в нормальный
+            pCtx.globalCompositeOperation = 'source-over';
+
             statusText.innerText = "Готово!";
             setTimeout(() => statusText.style.display = 'none', 2000);
+            
         } catch (err) {
             console.error("Ошибка сегментации:", err);
             statusText.innerText = "Ошибка при вырезании!";
@@ -182,7 +208,7 @@
 
         const img = new Image();
         img.onload = async function() {
-            await processImageToMask(img); // Запускаем вырезание
+            await processImageToMask(img); 
             uploadLabel.innerHTML = 'Загрузить другое фото';
             uploadLabel.classList.remove('loading');
         }
@@ -209,13 +235,13 @@
     function drawLoop() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // 1. СНАЧАЛА рисуем камеру (самый нижний слой)
+        // 1. СНАЧАЛА рисуем камеру 
         const camScale = Math.max(canvas.width / video.videoWidth, canvas.height / video.videoHeight);
         const camX = (canvas.width / 2) - (video.videoWidth / 2) * camScale;
         const camY = (canvas.height / 2) - (video.videoHeight / 2) * camScale;
         ctx.drawImage(video, camX, camY, video.videoWidth * camScale, video.videoHeight * camScale);
 
-        // 2. ЗАТЕМ сверху накидываем готовое фото (там, где одежда, фото прозрачное, поэтому видно камеру)
+        // 2. ЗАТЕМ сверху кидаем обработанное фото
         if (processedCanvas) {
             const scale = Math.max(canvas.width / processedCanvas.width, canvas.height / processedCanvas.height);
             const x = (canvas.width / 2) - (processedCanvas.width / 2) * scale;
