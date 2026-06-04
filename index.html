@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Yliko AI Wardrobe</title>
+    <!-- Telegram Web Apps API -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Конвертер HEIC -->
     <script src="https://cdn.jsdelivr.net/npm/heic2any/dist/heic2any.min.js"></script>
     <style>
         /* --- CSS ПЕРЕМЕННЫЕ И ТЕМЫ --- */
@@ -16,6 +18,9 @@
             --glass-border: rgba(255, 255, 255, 0.2);
             --status-bg: rgba(255, 255, 255, 0.7);
             --shadow-color: rgba(0,0,0,0.1);
+            /* Переменные для шторки */
+            --sheet-bg: #ffffff;
+            --sheet-text: #333;
         }
 
         /* Светлая тема */
@@ -27,6 +32,8 @@
             --glass-border: rgba(0, 0, 0, 0.1);
             --status-bg: rgba(255, 255, 255, 0.8);
             --shadow-color: rgba(0,0,0,0.1);
+            --sheet-bg: #ffffff;
+            --sheet-text: #333;
         }
 
         /* Темная тема */
@@ -38,6 +45,8 @@
             --glass-border: rgba(255, 255, 255, 0.2);
             --status-bg: rgba(0, 0, 0, 0.7);
             --shadow-color: rgba(255,255,255,0.05);
+            --sheet-bg: #1a1a1a;
+            --sheet-text: #f1f1f1;
         }
 
         /* Синяя тема */
@@ -49,6 +58,8 @@
             --glass-border: rgba(255, 255, 255, 0.2);
             --status-bg: rgba(26, 42, 68, 0.7);
             --shadow-color: rgba(255,255,255,0.1);
+            --sheet-bg: #1a2a44;
+            --sheet-text: #f1f1f1;
         }
 
         /* Зеленая тема */
@@ -60,17 +71,21 @@
             --glass-border: rgba(255, 255, 255, 0.2);
             --status-bg: rgba(26, 51, 40, 0.7);
             --shadow-color: rgba(255,255,255,0.1);
+            --sheet-bg: #1a3328;
+            --sheet-text: #f1f1f1;
         }
 
         /* Стеклянная тема (СВЕТЛАЯ) */
         body.theme-glass {
             --bg-color: transparent; 
-            --text-color: #222; /* Темный текст для читаемости */
+            --text-color: #222; 
             --accent-color: #6200EE; 
-            --glass-bg: rgba(255, 255, 255, 0.6); /* Светлое матовое стекло */
+            --glass-bg: rgba(255, 255, 255, 0.6); 
             --glass-border: rgba(255, 255, 255, 0.8);
             --status-bg: rgba(255, 255, 255, 0.9);
             --shadow-color: rgba(0,0,0,0.15);
+            --sheet-bg: rgba(255, 255, 255, 0.95);
+            --sheet-text: #222;
         }
 
         /* --- БАЗОВЫЕ СТИЛИ --- */
@@ -149,7 +164,7 @@
             background: linear-gradient(135deg, #1a3328 0%, #2e5140 100%);
         }
         body.theme-glass #start-screen {
-            background: rgba(255, 255, 255, 0.4); /* Светлый полупрозрачный фон */
+            background: rgba(255, 255, 255, 0.4); 
             backdrop-filter: blur(20px);
         }
 
@@ -158,14 +173,23 @@
             visibility: hidden;
         }
 
+        /* --- СТИЛЬНОЕ ЛОГО --- */
         .logo-container {
-            margin-bottom: 40px;
+            margin-bottom: 30px;
             text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
-        .logo-icon {
-            font-size: 64px;
+        
+        .logo-svg {
+            width: 110px;
+            height: 110px;
             margin-bottom: 10px;
+            filter: drop-shadow(0 4px 15px var(--accent-color));
+            transition: all 0.5s ease;
         }
+
         .app-title {
             font-size: 28px;
             font-weight: bold;
@@ -235,8 +259,6 @@
             border: 1px solid rgba(255, 255, 255, 0.3);
             transition: all 0.3s;
             text-decoration: none;
-            
-            /* Жесткая центровка контента */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -253,7 +275,7 @@
             background: var(--glass-bg);
             color: var(--text-color);
             border-color: var(--glass-border);
-            padding: 16px 20px; /* Немного увеличил высоту для красоты */
+            padding: 16px 20px; 
             border-radius: 25px;
             font-size: 16px;
             width: 100%;
@@ -343,13 +365,14 @@
             bottom: 0;
             left: 0;
             width: 100%;
-            background: var(--bg-color);
+            /* Цвета теперь привязаны к переменным из :root */
+            background: var(--sheet-bg); 
             border-radius: 20px 20px 0 0;
             z-index: 301;
             padding: 20px;
             box-sizing: border-box;
             transform: translateY(100%);
-            transition: transform 0.3s ease-out;
+            transition: transform 0.3s ease-out, background 0.3s;
             box-shadow: 0 -4px 20px var(--shadow-color);
         }
         .bottom-sheet.open {
@@ -359,7 +382,7 @@
         .sheet-handle {
             width: 40px;
             height: 4px;
-            background: var(--text-color);
+            background: var(--sheet-text);
             opacity: 0.2;
             border-radius: 2px;
             margin: 0 auto 15px auto;
@@ -375,7 +398,7 @@
         }
         .sheet-content {
             font-size: 14px;
-            color: var(--text-color);
+            color: var(--sheet-text);
             line-height: 1.5;
             list-style: none;
             padding: 0;
@@ -387,7 +410,6 @@
             align-items: start;
             gap: 8px;
         }
-        /* УДАЛЕНО: .sheet-content li::before (чтобы не было двойных галочек) */
         
         .sheet-close-btn {
             background: var(--accent-color);
@@ -399,14 +421,18 @@
             cursor: pointer;
             width: 100%;
             margin-top: 15px;
+            transition: background 0.3s;
         }
     </style>
 </head>
-<body class="theme-dark"> <canvas id="mainCanvas" width="1080" height="1920"></canvas>
+<body class="theme-dark"> 
+
+    <canvas id="mainCanvas" width="1080" height="1920"></canvas>
     <video id="videoElement" autoplay playsinline></video>
     <input type="file" id="imageUpload" accept="image/*, .heic, .heif">
     <div id="status-overlay"></div>
 
+    <!-- === ГЛАВНОЕ МЕНЮ === -->
     <div id="start-screen">
         <div class="header-controls">
             <div class="lang-switch" id="langSwitch">UK 🇺🇦 | EN 🇬🇧</div>
@@ -420,7 +446,20 @@
         </div>
 
         <div class="logo-container">
-            <div class="logo-icon">👗</div>
+            <!-- СТИЛЬНАЯ ИКОНКА (Адаптируется под цвет темы) -->
+            <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="dressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="var(--accent-color)" />
+                        <stop offset="100%" stop-color="var(--accent-color)" stop-opacity="0.3"/>
+                    </linearGradient>
+                </defs>
+                <!-- Контур вешалки и платья -->
+                <path d="M50 5 C53 5 56 8 56 11 C56 14 54 16 51 16 L51 20 L75 32 L72 36 L52 26 L52 32 C60 35 66 42 68 52 C68 52 72 75 85 90 L15 90 C28 75 32 52 32 52 C34 42 40 35 48 32 L48 26 L28 36 L25 32 L49 20 L49 16 C46 16 44 14 44 11 C44 8 47 5 50 5 Z" fill="url(#dressGradient)" stroke="var(--text-color)" stroke-width="1" stroke-opacity="0.2"/>
+                <!-- Декоративные линии изгибов -->
+                <path d="M50 32 C42 50 25 70 15 90 L35 90 C45 70 50 50 50 32 Z" fill="rgba(255,255,255,0.2)"/>
+                <path d="M50 32 C58 50 75 70 85 90 L65 90 C55 70 50 50 50 32 Z" fill="rgba(0,0,0,0.1)"/>
+            </svg>
             <h1 class="app-title">Yliko AI Wardrobe</h1>
             <p class="app-welcome" id="welcomeText">Знайди свій ідеальний колір наживо</p>
         </div>
@@ -433,6 +472,7 @@
         <div class="req-footnote" id="reqFootnote">ℹ️ Вимоги до фото</div>
     </div>
 
+    <!-- === AR КОНТРОЛЫ === -->
     <div class="ar-header-controls" id="arHeaderControls">
         <button class="btn" id="backToMenuBtn">⬅️ Назад</button>
         <button class="btn" id="switchCameraBtn">🔄 Камера</button>
@@ -441,6 +481,7 @@
         <button class="btn btn-capture" id="captureBtn">📸 Зробити фото</button>
     </div>
 
+    <!-- === ПАНЕЛЬ ТРЕБОВАНИЙ === -->
     <div class="bottom-sheet-overlay" id="sheetOverlay"></div>
     <div class="bottom-sheet" id="bottomSheet">
         <div class="sheet-handle" id="sheetHandle"></div>
@@ -516,7 +557,7 @@
             status_ai_ready: "ШІ готовий!",
             status_processing: "Вирізаємо одяг...",
             status_done: "Готово!",
-            err_ai: "Ошибка загрузки ШІ.",
+            err_ai: "Помилка завантаження ШІ.",
             err_clothes: "Нейромережа не знайшла одяг. Спробуйте інше фото!",
             err_camera: "Помилка камери."
         },
@@ -574,16 +615,7 @@
     function applyTheme(themeName) {
         document.body.classList.remove('theme-light', 'theme-dark', 'theme-blue', 'theme-green', 'theme-glass');
         document.body.classList.add(themeName);
-        
-        // Темная шторка только для действительно темных тем
-        if (themeName === 'theme-dark' || themeName === 'theme-blue') {
-            bottomSheet.style.background = "#1a1a1a";
-            bottomSheet.style.color = "#f1f1f1";
-        } else {
-            // Для светлой и стеклянной темы (она теперь светлая) - белая шторка
-            bottomSheet.style.background = "#ffffff";
-            bottomSheet.style.color = "#333";
-        }
+        // Теперь мы не используем JS для смены фона шторки! Все делает CSS-переменная --sheet-bg.
     }
 
     themeSelect.addEventListener('change', (e) => {
