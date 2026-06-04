@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Yliko Color Code - Full Vertical AR TWA</title>
+    <title>Yliko AI Wardrobe</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/heic2any/dist/heic2any.min.js"></script>
     <style>
@@ -11,14 +11,14 @@
         :root {
             --bg-color: #f1f1f1;
             --text-color: #333;
-            --accent-color: #007AFF; /* Синий Apple */
+            --accent-color: #007AFF; 
             --glass-bg: rgba(255, 255, 255, 0.4);
             --glass-border: rgba(255, 255, 255, 0.2);
             --status-bg: rgba(255, 255, 255, 0.7);
             --shadow-color: rgba(0,0,0,0.1);
         }
 
-        /* Светлая тема (Minimal White) */
+        /* Светлая тема */
         body.theme-light {
             --bg-color: #ffffff;
             --text-color: #333;
@@ -29,7 +29,7 @@
             --shadow-color: rgba(0,0,0,0.1);
         }
 
-        /* Темная тема (Deep Black) */
+        /* Темная тема */
         body.theme-dark {
             --bg-color: #000000;
             --text-color: #f1f1f1;
@@ -40,7 +40,7 @@
             --shadow-color: rgba(255,255,255,0.05);
         }
 
-        /* Синяя тема (Midnight Blue) */
+        /* Синяя тема */
         body.theme-blue {
             --bg-color: #1a2a44;
             --text-color: #f1f1f1;
@@ -51,7 +51,7 @@
             --shadow-color: rgba(255,255,255,0.1);
         }
 
-        /* Зеленая тема (Forest Green) */
+        /* Зеленая тема */
         body.theme-green {
             --bg-color: #1a3328;
             --text-color: #f1f1f1;
@@ -62,15 +62,15 @@
             --shadow-color: rgba(255,255,255,0.1);
         }
 
-        /* Стеклянная тема (Glass) */
+        /* Стеклянная тема (СВЕТЛАЯ) */
         body.theme-glass {
             --bg-color: transparent; 
-            --text-color: #ffffff;
+            --text-color: #222; /* Темный текст для читаемости */
             --accent-color: #6200EE; 
-            --glass-bg: rgba(255, 255, 255, 0.15);
-            --glass-border: rgba(255, 255, 255, 0.3);
-            --status-bg: rgba(255, 255, 255, 0.2);
-            --shadow-color: rgba(255,255,255,0.2);
+            --glass-bg: rgba(255, 255, 255, 0.6); /* Светлое матовое стекло */
+            --glass-border: rgba(255, 255, 255, 0.8);
+            --status-bg: rgba(255, 255, 255, 0.9);
+            --shadow-color: rgba(0,0,0,0.15);
         }
 
         /* --- БАЗОВЫЕ СТИЛИ --- */
@@ -89,7 +89,6 @@
             transition: background-color 0.3s, color 0.3s;
         }
 
-        /* --- ИСПРАВЛЕНИЕ: Вертикальное разрешение Canvas --- */
         canvas { 
             background: #000; 
             position: absolute;
@@ -97,13 +96,12 @@
             left: 0;
             width: 100%; 
             height: 100%; 
-            object-fit: cover; /* Ключевое изменение: идеальное заполнение экрана */
-            z-index: 10; /* Держим камеру под интерфейсом */
+            object-fit: cover; 
+            z-index: 10; 
         }
         
         video { display: none; }
         
-        /* Стили статуса (оверлея) */
         #status-overlay {
             position: absolute;
             top: 20px;
@@ -113,7 +111,7 @@
             font-size: 14px;
             font-weight: bold;
             text-align: center;
-            z-index: 200; /* Самый верхний слой */
+            z-index: 200; 
             background: var(--status-bg);
             padding: 10px 20px;
             border-radius: 20px;
@@ -122,7 +120,7 @@
             max-width: 80%;
         }
 
-        /* --- ГЛАВНОЕ МЕНЮ (Start Screen) --- */
+        /* --- ГЛАВНОЕ МЕНЮ --- */
         #start-screen {
             position: absolute;
             top: 0;
@@ -134,7 +132,7 @@
             justify-content: center;
             align-items: center;
             background: linear-gradient(135deg, var(--bg-color) 0%, #d8d8d8 100%);
-            z-index: 150; /* Поверх AR, но под статусом */
+            z-index: 150; 
             transition: opacity 0.5s, visibility 0.5s;
             overflow-y: auto;
             padding: 20px;
@@ -151,8 +149,8 @@
             background: linear-gradient(135deg, #1a3328 0%, #2e5140 100%);
         }
         body.theme-glass #start-screen {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(15px);
+            background: rgba(255, 255, 255, 0.4); /* Светлый полупрозрачный фон */
+            backdrop-filter: blur(20px);
         }
 
         #start-screen.hidden {
@@ -160,7 +158,6 @@
             visibility: hidden;
         }
 
-        /* Заголовок и лого */
         .logo-container {
             margin-bottom: 40px;
             text-align: center;
@@ -182,7 +179,6 @@
             margin-top: 5px;
         }
 
-        /* Переключатели */
         .header-controls {
             position: absolute;
             top: 20px;
@@ -205,7 +201,6 @@
             outline: none;
         }
 
-        /* Кнопки главного меню */
         .main-btns-container {
             display: flex;
             flex-direction: column;
@@ -215,7 +210,6 @@
             margin-bottom: 50px;
         }
 
-        /* Сноска требований */
         .req-footnote {
             position: absolute;
             bottom: 30px;
@@ -228,7 +222,65 @@
         }
         .req-footnote:hover { opacity: 1; }
 
-        /* --- КНОПКИ AR РЕЖИМА --- */
+        /* --- КНОПКИ --- */
+        .btn {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 12px 18px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s;
+            text-decoration: none;
+            
+            /* Жесткая центровка контента */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            gap: 8px;
+            box-sizing: border-box;
+        }
+        .btn:active {
+            transform: scale(0.95);
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .btn-main {
+            background: var(--glass-bg);
+            color: var(--text-color);
+            border-color: var(--glass-border);
+            padding: 16px 20px; /* Немного увеличил высоту для красоты */
+            border-radius: 25px;
+            font-size: 16px;
+            width: 100%;
+            box-shadow: 0 4px 15px var(--shadow-color);
+        }
+        .btn-main:hover {
+            background: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+        
+        .btn-capture {
+            background: #007AFF;
+            border-color: #007AFF;
+            padding: 15px 25px;
+            border-radius: 25px;
+            font-size: 16px;
+        }
+        
+        .btn.loading {
+            background: #f39c12;
+            pointer-events: none;
+            opacity: 0.8;
+        }
+        input[type="file"] { display: none; }
+
+        /* --- AR КОНТРОЛЫ --- */
         .ar-controls-container {
             position: absolute;
             bottom: 30px;
@@ -236,7 +288,7 @@
             flex-wrap: wrap; 
             justify-content: center;
             gap: 10px;
-            z-index: 100; /* Поверх Canvas */
+            z-index: 100;
             width: 100%;
             padding: 0 10px;
             box-sizing: border-box;
@@ -249,7 +301,6 @@
             visibility: visible;
         }
 
-        /* Кнопки вверху AR режима */
         .ar-header-controls {
             position: absolute;
             top: 20px;
@@ -259,7 +310,7 @@
             justify-content: space-between;
             padding: 0 20px;
             box-sizing: border-box;
-            z-index: 100; /* Поверх Canvas */
+            z-index: 100;
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.5s;
@@ -269,61 +320,7 @@
             visibility: visible;
         }
 
-        /* Стили кнопок */
-        .btn {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            color: white;
-            padding: 12px 18px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            transition: all 0.3s;
-            text-align: center;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
-        }
-        .btn:active {
-            transform: scale(0.95);
-            background: rgba(255, 255, 255, 0.3);
-        }
-        /* Главная кнопка затвора */
-        .btn-capture {
-            background: #007AFF;
-            border-color: #007AFF;
-            padding: 15px 25px;
-            border-radius: 25px;
-            font-size: 16px;
-        }
-        /* Кнопки в главном меню */
-        .btn-main {
-            background: var(--glass-bg);
-            color: var(--text-color);
-            border-color: var(--glass-border);
-            padding: 15px 20px;
-            border-radius: 25px;
-            font-size: 16px;
-            width: 100%;
-            box-shadow: 0 2px 5px var(--shadow-color);
-        }
-        .btn-main:hover {
-            background: var(--accent-color);
-            color: white;
-            border-color: var(--accent-color);
-        }
-        .btn.loading {
-            background: #f39c12;
-            pointer-events: none;
-            opacity: 0.8;
-        }
-        input[type="file"] { display: none; }
-
-        /* --- ВЫДВИЖНАЯ ПАНЕЛЬ ТРЕБОВАНИЙ (Bottom Sheet) --- */
+        /* --- ВЫДВИЖНАЯ ПАНЕЛЬ ТРЕБОВАНИЙ --- */
         .bottom-sheet-overlay {
             position: absolute;
             top: 0;
@@ -331,7 +328,7 @@
             width: 100%;
             height: 100%;
             background: rgba(0,0,0,0.5);
-            z-index: 300; /* Самый верх */
+            z-index: 300; 
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.3s;
@@ -348,7 +345,7 @@
             width: 100%;
             background: var(--bg-color);
             border-radius: 20px 20px 0 0;
-            z-index: 301; /* Поверх оверлея */
+            z-index: 301;
             padding: 20px;
             box-sizing: border-box;
             transform: translateY(100%);
@@ -359,7 +356,6 @@
             transform: translateY(0);
         }
 
-        /* Линия для свайпа вниз */
         .sheet-handle {
             width: 40px;
             height: 4px;
@@ -386,16 +382,13 @@
             margin: 0;
         }
         .sheet-content li {
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             display: flex;
             align-items: start;
             gap: 8px;
         }
-        .sheet-content li::before {
-            content: '✔️';
-            font-size: 12px;
-            margin-top: 2px;
-        }
+        /* УДАЛЕНО: .sheet-content li::before (чтобы не было двойных галочек) */
+        
         .sheet-close-btn {
             background: var(--accent-color);
             color: white;
@@ -409,19 +402,17 @@
         }
     </style>
 </head>
-<body class="theme-light"> <canvas id="mainCanvas" width="1080" height="1920"></canvas>
-    
+<body class="theme-dark"> <canvas id="mainCanvas" width="1080" height="1920"></canvas>
     <video id="videoElement" autoplay playsinline></video>
     <input type="file" id="imageUpload" accept="image/*, .heic, .heif">
-
     <div id="status-overlay"></div>
 
     <div id="start-screen">
         <div class="header-controls">
             <div class="lang-switch" id="langSwitch">UK 🇺🇦 | EN 🇬🇧</div>
             <select class="theme-select" id="themeSelect">
+                <option value="theme-dark">Dark Темна</option>
                 <option value="theme-light">Apple Світла</option>
-                <option value="theme-dark">Deep Темна</option>
                 <option value="theme-blue">Midnight Синя</option>
                 <option value="theme-green">Forest Зелена</option>
                 <option value="theme-glass">Glass Скляна</option>
@@ -430,7 +421,7 @@
 
         <div class="logo-container">
             <div class="logo-icon">👗</div>
-            <h1 class="app-title">Yliko Color Code</h1>
+            <h1 class="app-title">Yliko AI Wardrobe</h1>
             <p class="app-welcome" id="welcomeText">Знайди свій ідеальний колір наживо</p>
         </div>
 
@@ -446,7 +437,6 @@
         <button class="btn" id="backToMenuBtn">⬅️ Назад</button>
         <button class="btn" id="switchCameraBtn">🔄 Камера</button>
     </div>
-    
     <div class="ar-controls-container" id="arControls">
         <button class="btn btn-capture" id="captureBtn">📸 Зробити фото</button>
     </div>
@@ -455,25 +445,22 @@
     <div class="bottom-sheet" id="bottomSheet">
         <div class="sheet-handle" id="sheetHandle"></div>
         <div class="sheet-title" id="sheetTitle">Вимоги до фото:</div>
-        <ul class="sheet-content" id="sheetContent">
-            </ul>
+        <ul class="sheet-content" id="sheetContent"></ul>
         <button class="sheet-close-btn" id="sheetCloseBtn">Закрити</button>
     </div>
 
 <script type="module">
     import { ImageSegmenter, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3";
 
-    // Инициализация Telegram Web App API
     const tg = window.Telegram.WebApp;
     tg.ready();
-    tg.expand(); // Разворачиваем на весь экран
+    tg.expand(); 
     tg.MainButton.hide(); 
 
     const video = document.getElementById('videoElement');
     const canvas = document.getElementById('mainCanvas');
     const ctx = canvas.getContext('2d');
     
-    // UI элементы Меню
     const startScreen = document.getElementById('start-screen');
     const startCameraBtn = document.getElementById('startCameraBtn');
     const uploadBtn = document.getElementById('uploadBtn');
@@ -482,14 +469,12 @@
     const langSwitch = document.getElementById('langSwitch');
     const themeSelect = document.getElementById('themeSelect');
 
-    // UI элементы AR
     const arControls = document.getElementById('arControls');
     const arHeaderControls = document.getElementById('arHeaderControls');
     const captureBtn = document.getElementById('captureBtn');
     const switchCameraBtn = document.getElementById('switchCameraBtn');
     const backToMenuBtn = document.getElementById('backToMenuBtn');
 
-    // UI элементы Bottom Sheet
     const sheetOverlay = document.getElementById('sheetOverlay');
     const bottomSheet = document.getElementById('bottomSheet');
     const sheetHandle = document.getElementById('sheetHandle');
@@ -497,22 +482,18 @@
     const sheetContent = document.getElementById('sheetContent');
     const sheetCloseBtn = document.getElementById('sheetCloseBtn');
 
-    // Статус и оверлей
     const statusOverlay = document.getElementById('status-overlay');
     const imageUploadInput = document.getElementById('imageUpload');
     
-    // Глобальные переменные
     let processedCanvas = null; 
     let segmenter = null;
     let currentStream = null;
-    let currentFacingMode = "user"; // Начинаем с селфи
+    let currentFacingMode = "user"; 
     let isDrawingLoopRunning = false;
-    let isArModeActive = false; // Флаг, активен ли режим AR
+    let isArModeActive = false; 
     
-    // Состояние локализации
-    let currentLang = 'uk'; // По умолчанию укр
+    let currentLang = 'uk'; 
 
-    // --- ОБЪЕКТЫ ЛОКАЛИЗАЦИИ ---
     const UI_TEXT = {
         uk: {
             welcome: "Знайди свій ідеальний колір наживо",
@@ -566,46 +547,40 @@
         }
     }
 
-    // --- ФУНКЦИЯ ЛОКАЛИЗАЦИИ UI ---
     function updateLang(lang) {
         currentLang = lang;
         const text = UI_TEXT[lang];
         
-        // Главное меню
         welcomeText.innerText = text.welcome;
         startCameraBtn.innerText = text.btn_camera;
-        uploadBtn.childNodes[0].nodeValue = text.btn_upload + ' '; // Логика для label
+        uploadBtn.childNodes[0].nodeValue = text.btn_upload; 
         reqFootnote.innerText = text.footnote;
         
-        // AR режим
         backToMenuBtn.innerText = text.btn_back;
         captureBtn.innerText = text.btn_capture;
         switchCameraBtn.innerText = text.btn_switch;
         
-        // Bottom Sheet
         sheetTitle.innerText = text.sheet_title;
         sheetContent.innerHTML = text.sheet_content;
         sheetCloseBtn.innerText = text.sheet_close;
 
-        // Кнопка переключателя
         langSwitch.innerText = lang === 'uk' ? 'UK 🇺🇦 | EN' : 'UK | EN 🇬🇧';
     }
 
-    // Переключатель языка
     langSwitch.addEventListener('click', () => {
         updateLang(currentLang === 'uk' ? 'en' : 'uk');
     });
 
-    // --- ФУНКЦИЯ УПРАВЛЕНИЯ ТЕМАМИ ---
     function applyTheme(themeName) {
         document.body.classList.remove('theme-light', 'theme-dark', 'theme-blue', 'theme-green', 'theme-glass');
         document.body.classList.add(themeName);
         
-        // Синхронизируем BottomSheet с темой
-        if (themeName === 'theme-glass' || themeName === 'theme-dark' || themeName === 'theme-blue') {
+        // Темная шторка только для действительно темных тем
+        if (themeName === 'theme-dark' || themeName === 'theme-blue') {
             bottomSheet.style.background = "#1a1a1a";
             bottomSheet.style.color = "#f1f1f1";
         } else {
+            // Для светлой и стеклянной темы (она теперь светлая) - белая шторка
             bottomSheet.style.background = "#ffffff";
             bottomSheet.style.color = "#333";
         }
@@ -615,16 +590,13 @@
         applyTheme(e.target.value);
     });
 
-    // --- ФУНКЦИЯ УПРАВЛЕНИЯ AR РЕЖИМОМ (Вкл/Выкл Меню) ---
     function toggleArMode(active) {
         isArModeActive = active;
         if (active) {
-            // Показываем AR
             arControls.classList.add('visible');
             arHeaderControls.classList.add('visible');
             startScreen.classList.add('hidden');
         } else {
-            // Прячем AR
             arControls.classList.remove('visible');
             arHeaderControls.classList.remove('visible');
             startScreen.classList.remove('hidden');
@@ -635,7 +607,6 @@
         }
     }
 
-    // --- ФУНКЦИЯ СТАТУСА (Оверлея) ---
     function showStatus(text, duration = 2000) {
         statusOverlay.innerText = text;
         statusOverlay.style.display = 'block';
@@ -644,7 +615,6 @@
         }
     }
 
-    // --- 1. ЗАГРУЗКА ИИ ---
     async function initAI() {
         showStatus(UI_TEXT[currentLang].status_ai_load, 0);
         try {
@@ -654,7 +624,7 @@
             segmenter = await ImageSegmenter.createFromOptions(vision, {
                 baseOptions: {
                     modelAssetPath: "https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_multiclass_256x256/float32/latest/selfie_multiclass_256x256.tflite",
-                    delegate: "CPU" // Стабильно WKWebView
+                    delegate: "CPU" 
                 },
                 runningMode: "IMAGE",
                 outputCategoryMask: true,
@@ -671,7 +641,6 @@
         }
     }
 
-    // --- 2. ФУНКЦИЯ ВЫРЕЗАНИЯ ОДЕЖДЫ (Masking) ---
     async function processImageToMask(img) {
         showStatus(UI_TEXT[currentLang].status_processing, 0);
         
@@ -690,7 +659,7 @@
             let clothesFound = false;
 
             for (let i = 0; i < maskArray.length; i++) {
-                if (maskArray[i] === 4) { // 4 - код одежды
+                if (maskArray[i] === 4) { 
                     clothesFound = true;
                     maskImageData.data[i * 4 + 3] = 255; 
                 } else {
@@ -706,7 +675,6 @@
 
             maskCtx.putImageData(maskImageData, 0, 0);
 
-            // Ограничение размера финального фото
             const MAX_SIZE = 1080;
             let pWidth = img.width;
             let pHeight = img.height;
@@ -728,7 +696,6 @@
 
             showStatus(UI_TEXT[currentLang].status_done, 1500);
             
-            // Включаем AR
             if (!isArModeActive) {
                 toggleArMode(true);
                 initCamera();
@@ -740,7 +707,6 @@
         }
     }
 
-    // --- 3. ОБРАБОТКА ЛОГИКИ AR КАМЕРЫ ---
     async function initCamera() {
         if (currentStream) {
             currentStream.getTracks().forEach(track => track.stop());
@@ -765,18 +731,15 @@
         }
     }
 
-    // Цикл отрисовки на холсте (с учетом object-fit: cover в CSS)
     function drawLoop() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Расчет кропа видео
         const camScale = Math.max(canvas.width / video.videoWidth, canvas.height / video.videoHeight);
         const camW = video.videoWidth * camScale;
         const camH = video.videoHeight * camScale;
         const camX = (canvas.width / 2) - (camW / 2);
         const camY = (canvas.height / 2) - (camH / 2);
 
-        // Дзеркало для селфі
         if (currentFacingMode === "user") {
             ctx.save();
             ctx.translate(canvas.width, 0); 
@@ -787,7 +750,6 @@
             ctx.drawImage(video, camX, camY, camW, camH);
         }
 
-        // Накладываем фото сверху
         if (processedCanvas) {
             const scale = Math.max(canvas.width / processedCanvas.width, canvas.height / processedCanvas.height);
             const w = processedCanvas.width * scale;
@@ -800,8 +762,6 @@
         
         requestAnimationFrame(drawLoop);
     }
-
-    // --- 4. ОБРАБОТЧИКИ КНОПОК ---
 
     startCameraBtn.addEventListener('click', () => {
         processedCanvas = null;
@@ -860,7 +820,6 @@
         uploadBtn.childNodes[0].nodeValue = '... ';
         uploadBtn.classList.add('loading');
 
-        // HEIC
         const isHeic = file.name.toLowerCase().endsWith('.heic') || file.name.toLowerCase().endsWith('.heif');
         if (isHeic) {
             try {
@@ -878,18 +837,17 @@
             img.onload = async function() {
                 processedCanvas = null;
                 await processImageToMask(img); 
-                uploadBtn.childNodes[0].nodeValue = UI_TEXT[currentLang].btn_upload + ' ';
+                uploadBtn.childNodes[0].nodeValue = UI_TEXT[currentLang].btn_upload;
                 uploadBtn.classList.remove('loading');
             }
             img.src = URL.createObjectURL(file);
         } else {
-             uploadBtn.childNodes[0].nodeValue = UI_TEXT[currentLang].btn_upload + ' ';
+             uploadBtn.childNodes[0].nodeValue = UI_TEXT[currentLang].btn_upload;
              uploadBtn.classList.remove('loading');
              showStatus("", 10);
         }
     });
 
-    // --- 5. ЛОГИКА BOTTOM SHEET (Требования) ---
     function openBottomSheet() {
         sheetOverlay.classList.add('visible');
         bottomSheet.classList.add('open');
@@ -918,7 +876,7 @@
 
     // --- СТАРТ ---
     updateLang('uk');
-    applyTheme('theme-light');
+    applyTheme('theme-dark');
     initAI();
 
 </script>
