@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Yliko AI Wardrobe</title>
-    <!-- Telegram Web Apps API -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Конвертер HEIC -->
     <script src="https://cdn.jsdelivr.net/npm/heic2any/dist/heic2any.min.js"></script>
     <style>
         /* --- CSS ПЕРЕМЕННЫЕ И ТЕМЫ --- */
@@ -18,7 +16,6 @@
             --glass-border: rgba(255, 255, 255, 0.2);
             --status-bg: rgba(255, 255, 255, 0.7);
             --shadow-color: rgba(0,0,0,0.1);
-            /* Переменные для шторки */
             --sheet-bg: #ffffff;
             --sheet-text: #333;
         }
@@ -294,6 +291,15 @@
             border-radius: 25px;
             font-size: 16px;
         }
+
+        .btn-save {
+            background: #4CAF50;
+            border-color: #4CAF50;
+            padding: 15px 25px;
+            border-radius: 25px;
+            font-size: 16px;
+            display: none; /* Скрыта по умолчанию */
+        }
         
         .btn.loading {
             background: #f39c12;
@@ -365,7 +371,6 @@
             bottom: 0;
             left: 0;
             width: 100%;
-            /* Цвета теперь привязаны к переменным из :root */
             background: var(--sheet-bg); 
             border-radius: 20px 20px 0 0;
             z-index: 301;
@@ -432,7 +437,6 @@
     <input type="file" id="imageUpload" accept="image/*, .heic, .heif">
     <div id="status-overlay"></div>
 
-    <!-- === ГЛАВНОЕ МЕНЮ === -->
     <div id="start-screen">
         <div class="header-controls">
             <div class="lang-switch" id="langSwitch">UK 🇺🇦 | EN 🇬🇧</div>
@@ -446,7 +450,6 @@
         </div>
 
         <div class="logo-container">
-            <!-- СТИЛЬНАЯ ИКОНКА (Адаптируется под цвет темы) -->
             <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                 <defs>
                     <linearGradient id="dressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -454,9 +457,7 @@
                         <stop offset="100%" stop-color="var(--accent-color)" stop-opacity="0.3"/>
                     </linearGradient>
                 </defs>
-                <!-- Контур вешалки и платья -->
                 <path d="M50 5 C53 5 56 8 56 11 C56 14 54 16 51 16 L51 20 L75 32 L72 36 L52 26 L52 32 C60 35 66 42 68 52 C68 52 72 75 85 90 L15 90 C28 75 32 52 32 52 C34 42 40 35 48 32 L48 26 L28 36 L25 32 L49 20 L49 16 C46 16 44 14 44 11 C44 8 47 5 50 5 Z" fill="url(#dressGradient)" stroke="var(--text-color)" stroke-width="1" stroke-opacity="0.2"/>
-                <!-- Декоративные линии изгибов -->
                 <path d="M50 32 C42 50 25 70 15 90 L35 90 C45 70 50 50 50 32 Z" fill="rgba(255,255,255,0.2)"/>
                 <path d="M50 32 C58 50 75 70 85 90 L65 90 C55 70 50 50 50 32 Z" fill="rgba(0,0,0,0.1)"/>
             </svg>
@@ -472,16 +473,15 @@
         <div class="req-footnote" id="reqFootnote">ℹ️ Вимоги до фото</div>
     </div>
 
-    <!-- === AR КОНТРОЛЫ === -->
     <div class="ar-header-controls" id="arHeaderControls">
         <button class="btn" id="backToMenuBtn">⬅️ Назад</button>
         <button class="btn" id="switchCameraBtn">🔄 Камера</button>
     </div>
     <div class="ar-controls-container" id="arControls">
         <button class="btn btn-capture" id="captureBtn">📸 Зробити фото</button>
+        <button class="btn btn-save" id="saveBtn">💾 Зберегти зображення</button>
     </div>
 
-    <!-- === ПАНЕЛЬ ТРЕБОВАНИЙ === -->
     <div class="bottom-sheet-overlay" id="sheetOverlay"></div>
     <div class="bottom-sheet" id="bottomSheet">
         <div class="sheet-handle" id="sheetHandle"></div>
@@ -513,6 +513,7 @@
     const arControls = document.getElementById('arControls');
     const arHeaderControls = document.getElementById('arHeaderControls');
     const captureBtn = document.getElementById('captureBtn');
+    const saveBtn = document.getElementById('saveBtn');
     const switchCameraBtn = document.getElementById('switchCameraBtn');
     const backToMenuBtn = document.getElementById('backToMenuBtn');
 
@@ -540,6 +541,7 @@
             welcome: "Знайди свій ідеальний колір наживо",
             btn_camera: "📸 Камера",
             btn_upload: "📂 Завантажити фото",
+            btn_save: "💾 Зберегти зображення",
             footnote: "ℹ️ Вимоги до фото",
             btn_back: "⬅️ Назад",
             btn_capture: "📸 Зробити фото",
@@ -557,6 +559,7 @@
             status_ai_ready: "ШІ готовий!",
             status_processing: "Вирізаємо одяг...",
             status_done: "Готово!",
+            status_saved: "Збережено у галерею!",
             err_ai: "Помилка завантаження ШІ.",
             err_clothes: "Нейромережа не знайшла одяг. Спробуйте інше фото!",
             err_camera: "Помилка камери."
@@ -565,6 +568,7 @@
             welcome: "Find your perfect color live",
             btn_camera: "📸 Camera",
             btn_upload: "📂 Upload Photo",
+            btn_save: "💾 Save Image",
             footnote: "ℹ️ Photo requirements",
             btn_back: "⬅️ Back",
             btn_capture: "📸 Snap photo",
@@ -582,6 +586,7 @@
             status_ai_ready: "AI ready!",
             status_processing: "Cutting clothes...",
             status_done: "Done!",
+            status_saved: "Saved to gallery!",
             err_ai: "AI Load Error.",
             err_clothes: "No clothes found. Try a different photo!",
             err_camera: "Camera Error."
@@ -595,6 +600,7 @@
         welcomeText.innerText = text.welcome;
         startCameraBtn.innerText = text.btn_camera;
         uploadBtn.childNodes[0].nodeValue = text.btn_upload; 
+        saveBtn.innerText = text.btn_save;
         reqFootnote.innerText = text.footnote;
         
         backToMenuBtn.innerText = text.btn_back;
@@ -615,12 +621,22 @@
     function applyTheme(themeName) {
         document.body.classList.remove('theme-light', 'theme-dark', 'theme-blue', 'theme-green', 'theme-glass');
         document.body.classList.add(themeName);
-        // Теперь мы не используем JS для смены фона шторки! Все делает CSS-переменная --sheet-bg.
     }
 
     themeSelect.addEventListener('change', (e) => {
         applyTheme(e.target.value);
     });
+
+    // Логика отображения кнопок AR
+    function updateArControls() {
+        if (processedCanvas) {
+            captureBtn.style.display = 'none';
+            saveBtn.style.display = 'flex';
+        } else {
+            captureBtn.style.display = 'flex';
+            saveBtn.style.display = 'none';
+        }
+    }
 
     function toggleArMode(active) {
         isArModeActive = active;
@@ -698,219 +714,3 @@
                     maskImageData.data[i * 4 + 3] = 0; 
                 }
             }
-
-            if (!clothesFound) {
-                alert(UI_TEXT[currentLang].err_clothes);
-                showStatus("", 10);
-                return;
-            }
-
-            maskCtx.putImageData(maskImageData, 0, 0);
-
-            const MAX_SIZE = 1080;
-            let pWidth = img.width;
-            let pHeight = img.height;
-            if (pWidth > MAX_SIZE || pHeight > MAX_SIZE) {
-                const ratio = Math.min(MAX_SIZE / pWidth, MAX_SIZE / pHeight);
-                pWidth = Math.round(pWidth * ratio);
-                pHeight = Math.round(pHeight * ratio);
-            }
-
-            processedCanvas = document.createElement('canvas');
-            processedCanvas.width = pWidth;
-            processedCanvas.height = pHeight;
-            const pCtx = processedCanvas.getContext('2d');
-
-            pCtx.drawImage(img, 0, 0, pWidth, pHeight);
-            pCtx.globalCompositeOperation = 'destination-out';
-            pCtx.drawImage(maskCanvas, 0, 0, pWidth, pHeight);
-            pCtx.globalCompositeOperation = 'source-over';
-
-            showStatus(UI_TEXT[currentLang].status_done, 1500);
-            
-            if (!isArModeActive) {
-                toggleArMode(true);
-                initCamera();
-            }
-            
-        } catch (err) {
-            console.error(err);
-            showStatus(UI_TEXT[currentLang].err_clothes, 3000);
-        }
-    }
-
-    async function initCamera() {
-        if (currentStream) {
-            currentStream.getTracks().forEach(track => track.stop());
-        }
-
-        try {
-            currentStream = await navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: currentFacingMode } 
-            });
-            video.srcObject = currentStream;
-            
-            video.onloadedmetadata = () => {
-                video.play();
-                if (!isDrawingLoopRunning) {
-                    isDrawingLoopRunning = true;
-                    requestAnimationFrame(drawLoop);
-                }
-            };
-        } catch (err) {
-            console.error("Ошибка камери: ", err);
-            showStatus(UI_TEXT[currentLang].err_camera, 3000);
-        }
-    }
-
-    function drawLoop() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        const camScale = Math.max(canvas.width / video.videoWidth, canvas.height / video.videoHeight);
-        const camW = video.videoWidth * camScale;
-        const camH = video.videoHeight * camScale;
-        const camX = (canvas.width / 2) - (camW / 2);
-        const camY = (canvas.height / 2) - (camH / 2);
-
-        if (currentFacingMode === "user") {
-            ctx.save();
-            ctx.translate(canvas.width, 0); 
-            ctx.scale(-1, 1); 
-            ctx.drawImage(video, camX, camY, camW, camH);
-            ctx.restore();
-        } else {
-            ctx.drawImage(video, camX, camY, camW, camH);
-        }
-
-        if (processedCanvas) {
-            const scale = Math.max(canvas.width / processedCanvas.width, canvas.height / processedCanvas.height);
-            const w = processedCanvas.width * scale;
-            const h = processedCanvas.height * scale;
-            const x = (canvas.width / 2) - (w / 2);
-            const y = (canvas.height / 2) - (h / 2);
-            
-            ctx.drawImage(processedCanvas, x, y, w, h);
-        }
-        
-        requestAnimationFrame(drawLoop);
-    }
-
-    startCameraBtn.addEventListener('click', () => {
-        processedCanvas = null;
-        toggleArMode(true);
-        initCamera();
-    });
-
-    backToMenuBtn.addEventListener('click', () => {
-        toggleArMode(false);
-    });
-
-    switchCameraBtn.addEventListener('click', () => {
-        currentFacingMode = currentFacingMode === "user" ? "environment" : "user";
-        initCamera();
-    });
-
-    captureBtn.addEventListener('click', async () => {
-        captureBtn.classList.add('loading');
-        captureBtn.innerText = 'Знімок...';
-
-        const snapCanvas = document.createElement('canvas');
-        snapCanvas.width = 1080;
-        snapCanvas.height = 1920;
-        const sCtx = snapCanvas.getContext('2d');
-
-        const scale = Math.max(snapCanvas.width / video.videoWidth, snapCanvas.height / video.videoHeight);
-        const camW = video.videoWidth * scale;
-        const camH = video.videoHeight * scale;
-        const camX = (snapCanvas.width / 2) - (camW / 2);
-        const camY = (snapCanvas.height / 2) - (camH / 2);
-
-        if (currentFacingMode === "user") {
-            sCtx.save();
-            sCtx.translate(snapCanvas.width, 0);
-            sCtx.scale(-1, 1);
-            sCtx.drawImage(video, camX, camY, camW, camH);
-            sCtx.restore();
-        } else {
-            sCtx.drawImage(video, camX, camY, camW, camH);
-        }
-
-        const snapshot = new Image();
-        snapshot.onload = async function() {
-            await processImageToMask(snapshot);
-            captureBtn.classList.remove('loading');
-            captureBtn.innerText = UI_TEXT[currentLang].btn_capture;
-        };
-        snapshot.src = snapCanvas.toDataURL('image/jpeg', 0.9);
-    });
-
-    uploadBtn.addEventListener('click', () => imageUploadInput.click()); 
-    imageUploadInput.addEventListener('change', async function(e) {
-        let file = e.target.files[0];
-        if (!file) return;
-
-        uploadBtn.childNodes[0].nodeValue = '... ';
-        uploadBtn.classList.add('loading');
-
-        const isHeic = file.name.toLowerCase().endsWith('.heic') || file.name.toLowerCase().endsWith('.heif');
-        if (isHeic) {
-            try {
-                showStatus("HEIC...", 0);
-                const convertedBlob = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.8 });
-                file = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
-            } catch (error) {
-                alert("Ошибка HEIC.");
-                file = null;
-            }
-        }
-
-        if (file) {
-            const img = new Image();
-            img.onload = async function() {
-                processedCanvas = null;
-                await processImageToMask(img); 
-                uploadBtn.childNodes[0].nodeValue = UI_TEXT[currentLang].btn_upload;
-                uploadBtn.classList.remove('loading');
-            }
-            img.src = URL.createObjectURL(file);
-        } else {
-             uploadBtn.childNodes[0].nodeValue = UI_TEXT[currentLang].btn_upload;
-             uploadBtn.classList.remove('loading');
-             showStatus("", 10);
-        }
-    });
-
-    function openBottomSheet() {
-        sheetOverlay.classList.add('visible');
-        bottomSheet.classList.add('open');
-    }
-    function closeBottomSheet() {
-        sheetOverlay.classList.remove('visible');
-        bottomSheet.classList.remove('open');
-    }
-
-    reqFootnote.addEventListener('click', openBottomSheet);
-    sheetOverlay.addEventListener('click', closeBottomSheet);
-    sheetCloseBtn.addEventListener('click', closeBottomSheet);
-    sheetHandle.addEventListener('click', closeBottomSheet);
-
-    let touchStartY = 0;
-    bottomSheet.addEventListener('touchstart', (e) => {
-        touchStartY = e.touches[0].clientY;
-    });
-    bottomSheet.addEventListener('touchmove', (e) => {
-        let touchCurrentY = e.touches[0].clientY;
-        let diff = touchCurrentY - touchStartY;
-        if (diff > 50) {
-            closeBottomSheet();
-        }
-    });
-
-    // --- СТАРТ ---
-    updateLang('uk');
-    applyTheme('theme-dark');
-    initAI();
-
-</script>
-</body>
-</html>
