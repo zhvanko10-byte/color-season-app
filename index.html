@@ -1,3 +1,25 @@
+Safari на iOS — это главный «кремень» в плане безопасности, и если камера не запускается даже там, дело почти наверняка в **двух вещах**: либо в протоколе соединения, либо в отсутствии одного специфического атрибута для видео в iOS.
+
+Вот две основные причины, почему это происходит, и как мы это сейчас решим:
+
+### 1. Главная причина: Отсутствие HTTPS (Критично для Safari)
+
+Safari **намертво блокирует** доступ к камере (`navigator.mediaDevices`), если сайт открыт не по безопасному протоколу `https://`.
+
+* Если ты тестируешь код локально (например, открываешь файл как `file:///...` или через локальный IP вроде `http://192.168.1.5:5500`), **Safari скрывает камеру на уровне движка**. Она будет работать *только* на `localhost` или через полноценный `https://`.
+* **Решение:** Для тестов нужно залить файл на бесплатный хостинг с SSL (GitHub Pages, Vercel, Netlify) или пробросить локальный адрес через утилиту вроде **ngrok** (`ngrok http 5500`), чтобы получить заветную `https://` ссылку.
+
+### 2. Техническая загвоздка в коде: Атрибут `muted`
+
+В iOS Safari элемент `<video>` часто наотрез отказывается запускать стрим с камеры, если у тега нет атрибута `muted` (даже если у нас стрим без звука). Браузер считает это «пыткой автоплеем» и блокирует поток.
+
+---
+
+Я обновил код: добавил `muted` для видеопотока, а также переписал функцию `initCamera`. Теперь, если проблема в HTTPS или блокировке Safari, приложение **не просто промолчит, а выведет четкое диалоговое окно (alert)** с подсказкой, что именно пошло не так.
+
+Полностью обнови свой `index.html` этим кодом:
+
+```html
 <!DOCTYPE html>
 <html lang="uk">
 <head>
@@ -21,7 +43,6 @@
             --sheet-text: #333;
         }
 
-        /* Светлая тема */
         body.theme-light {
             --bg-color: #ffffff;
             --text-color: #333;
@@ -34,7 +55,6 @@
             --sheet-text: #333;
         }
 
-        /* Темная тема */
         body.theme-dark {
             --bg-color: #000000;
             --text-color: #f1f1f1;
@@ -47,7 +67,6 @@
             --sheet-text: #f1f1f1;
         }
 
-        /* Синяя тема */
         body.theme-blue {
             --bg-color: #1a2a44;
             --text-color: #f1f1f1;
@@ -60,7 +79,6 @@
             --sheet-text: #f1f1f1;
         }
 
-        /* Зеленая тема */
         body.theme-green {
             --bg-color: #1a3328;
             --text-color: #f1f1f1;
@@ -73,7 +91,6 @@
             --sheet-text: #f1f1f1;
         }
 
-        /* Стеклянная тема */
         body.theme-glass {
             --bg-color: transparent; 
             --text-color: #222; 
@@ -86,7 +103,6 @@
             --sheet-text: #222;
         }
 
-        /* --- БАЗОВЫЕ СТИЛИ --- */
         body { 
             display: flex; 
             flex-direction: column;
@@ -152,19 +168,10 @@
             box-sizing: border-box;
         }
 
-        body.theme-dark #start-screen {
-            background: linear-gradient(135deg, #000 0%, #222 100%);
-        }
-        body.theme-blue #start-screen {
-            background: linear-gradient(135deg, #1a2a44 0%, #2e4a6a 100%);
-        }
-        body.theme-green #start-screen {
-            background: linear-gradient(135deg, #1a3328 0%, #2e5140 100%);
-        }
-        body.theme-glass #start-screen {
-            background: rgba(255, 255, 255, 0.4); 
-            backdrop-filter: blur(20px);
-        }
+        body.theme-dark #start-screen { background: linear-gradient(135deg, #000 0%, #222 100%); }
+        body.theme-blue #start-screen { background: linear-gradient(135deg, #1a2a44 0%, #2e4a6a 100%); }
+        body.theme-green #start-screen { background: linear-gradient(135deg, #1a3328 0%, #2e5140 100%); }
+        body.theme-glass #start-screen { background: rgba(255, 255, 255, 0.4); backdrop-filter: blur(20px); }
 
         #start-screen.hidden {
             opacity: 0;
@@ -370,10 +377,7 @@
             visibility: hidden;
             transition: opacity 0.3s;
         }
-        .bottom-sheet-overlay.visible {
-            opacity: 1;
-            visibility: visible;
-        }
+        .bottom-sheet-overlay.visible { opacity: 1; visibility: visible; }
 
         .bottom-sheet {
             position: absolute;
@@ -389,10 +393,7 @@
             transition: transform 0.3s ease-out, background 0.3s;
             box-shadow: 0 -4px 20px var(--shadow-color);
         }
-        .bottom-sheet.open {
-            transform: translateY(0);
-        }
-
+        .bottom-sheet.open { transform: translateY(0); }
         .sheet-handle {
             width: 40px;
             height: 4px;
@@ -402,7 +403,6 @@
             margin: 0 auto 15px auto;
             cursor: pointer;
         }
-
         .sheet-title {
             font-size: 18px;
             font-weight: bold;
@@ -424,7 +424,6 @@
             align-items: start;
             gap: 8px;
         }
-        
         .sheet-close-btn {
             background: var(--accent-color);
             color: white;
@@ -435,14 +434,15 @@
             cursor: pointer;
             width: 100%;
             margin-top: 15px;
-            transition: background 0.3s;
         }
     </style>
 </head>
 <body class="theme-dark"> 
 
     <canvas id="mainCanvas" width="1080" height="1920"></canvas>
-    <video id="videoElement" autoplay playsinline></video>
+    
+    <video id="videoElement" autoplay playsinline muted></video>
+    
     <input type="file" id="imageUpload" accept="image/*, .heic, .heif">
     <div id="status-overlay"></div>
 
@@ -503,7 +503,6 @@
     </div>
 
 <script>
-    // Инициализация MediaPipe через глобальный UMD объект tasksVision
     const { ImageSegmenter, FilesetResolver } = tasksVision;
 
     const tg = window.Telegram.WebApp;
@@ -645,18 +644,15 @@
         applyTheme(e.target.value);
     });
 
-    // Динамическое переключение кнопок на экране камеры
     function updateArControls() {
         if (processedCanvas) {
-            // Одежда вырезана — режим сравнения цветов
             captureBtn.style.display = 'none';
             arUploadBtn.style.display = 'none';
-            saveBtn.style.display = 'flex'; // Можно скачивать сколько угодно вариантов
-            resetBtn.style.display = 'flex'; // Кнопка сброса маски для нового кадра
+            saveBtn.style.display = 'flex';
+            resetBtn.style.display = 'flex';
         } else {
-            // Режим визирования камеры (одежда еще не вырезана)
             captureBtn.style.display = 'flex';
-            arUploadBtn.style.display = 'flex'; // Можно загрузить фото прямо отсюда
+            arUploadBtn.style.display = 'flex';
             saveBtn.style.display = 'none';
             resetBtn.style.display = 'none';
         }
@@ -707,7 +703,6 @@
         } catch (error) {
             console.error(error);
             showStatus(UI_TEXT[currentLang].err_ai, 5000);
-            statusOverlay.style.color = 'red';
         }
     }
 
@@ -729,7 +724,7 @@
             let clothesFound = false;
 
             for (let i = 0; i < maskArray.length; i++) {
-                if (maskArray[i] === 4) { // Код 4 — это одежда в Selfie Multiclass
+                if (maskArray[i] === 4) { 
                     clothesFound = true;
                     maskImageData.data[i * 4 + 3] = 255; 
                 } else {
@@ -778,32 +773,51 @@
         }
     }
 
+    // --- УЛУЧШЕННАЯ ФУНКЦИЯ ИНИЦИАЛИЗАЦИИ КАМЕРЫ (С ЛОВУШКОЙ ДЛЯ SAFARI/HTTP) ---
     async function initCamera() {
         if (currentStream) {
             currentStream.getTracks().forEach(track => track.stop());
         }
 
+        // Проверка: Безопасное ли соединение (Safari блокирует камеру на http:// и на локальных файлах file://)
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            alert("⚠️ Safari заблокував доступ до камери!\n\nПричина: Браузер вимагає безпечне з'єднання HTTPS. Якщо ви тестуєте локально (через http:// або відкрили індексний файл напряму), камера не запуститься. Будь ласка, використовуйте HTTPS (наприклад, сервіс ngrok або вивантажіть проект на хостинг GitHub Pages / Vercel).");
+            showStatus("Помилка: потрібен протокол HTTPS", 5000);
+            toggleArMode(false);
+            return;
+        }
+
         try {
+            // Пытаемся захватить камеру с конкретным facingMode
             currentStream = await navigator.mediaDevices.getUserMedia({ 
                 video: { facingMode: currentFacingMode } 
             });
-            video.srcObject = currentStream;
-            
-            video.onloadedmetadata = () => {
-                video.play();
-                if (!isDrawingLoopRunning) {
-                    isDrawingLoopRunning = true;
-                    requestAnimationFrame(drawLoop);
-                }
-            };
         } catch (err) {
-            console.error("Ошибка камеры: ", err);
-            showStatus(UI_TEXT[currentLang].err_camera, 3000);
+            console.warn("Помилка facingMode, спроба запустити дефолтні налаштування:", err);
+            try {
+                // Запасной вариант, если iOS споткнулся о точечные настройки
+                currentStream = await navigator.mediaDevices.getUserMedia({ video: true });
+            } catch (fallbackErr) {
+                console.error("Повна помилка камери: ", fallbackErr);
+                alert("Не вдалося отримати доступ до камери. Перевірте, чи дозволено камеру в налаштуваннях вашого пристрою або Safari для цього сайту.");
+                showStatus(UI_TEXT[currentLang].err_camera, 3000);
+                toggleArMode(false);
+                return;
+            }
         }
+
+        video.srcObject = currentStream;
+        
+        video.onloadedmetadata = () => {
+            video.play();
+            if (!isDrawingLoopRunning) {
+                isDrawingLoopRunning = true;
+                requestAnimationFrame(drawLoop);
+            }
+        };
     }
 
     function drawLoop() {
-        // Защита от критического бага: если размеры кадра камеры ещё не определены банком/дровами
         if (!video.videoWidth || !video.videoHeight) {
             requestAnimationFrame(drawLoop);
             return;
@@ -840,7 +854,6 @@
         requestAnimationFrame(drawLoop);
     }
 
-    // События кнопок
     startCameraBtn.addEventListener('click', () => {
         processedCanvas = null;
         updateArControls();
@@ -889,7 +902,6 @@
         snapshot.src = snapCanvas.toDataURL('image/jpeg', 0.9);
     });
 
-    // Бесконечное скачивание вариантов для сравнения
     saveBtn.addEventListener('click', () => {
         const dataURL = canvas.toDataURL('image/jpeg', 1.0);
         const a = document.createElement('a');
@@ -902,14 +914,12 @@
         showStatus(UI_TEXT[currentLang].status_saved, 2000);
     });
 
-    // Сброс маски (Новое фото) прямо внутри экрана камеры
     resetBtn.addEventListener('click', () => {
         processedCanvas = null;
         updateArControls();
         showStatus("");
     });
 
-    // Проброс клика на скрытый input выбора файла с обеих кнопок
     mainUploadBtn.addEventListener('click', () => imageUploadInput.click());
     arUploadBtn.addEventListener('click', () => imageUploadInput.click());
 
@@ -943,7 +953,6 @@
         }
     });
 
-    // Нижняя панель требований
     function openBottomSheet() {
         sheetOverlay.classList.add('visible');
         bottomSheet.classList.add('open');
@@ -971,11 +980,11 @@
         }
     });
 
-    // --- СТАРТ ПРИЛОЖЕНИЯ ---
     updateLang('uk');
     applyTheme('theme-dark');
     initAI();
-
 </script>
 </body>
 </html>
+
+```
